@@ -28,6 +28,13 @@ export const noteIdSchema = z.object({
   id: z.string().uuid('Invalid note ID format'),
 })
 
+export const processNoteSchema = z.object({
+  transcript: z.string()
+    .min(1, 'Transcript is required')
+    .max(10000, 'Transcript is too long (max 10000 characters)'),
+})
+
 export type CreateNoteInput = z.infer<typeof createNoteSchema>
 export type UpdateNoteInput = z.infer<typeof updateNoteSchema>
 export type NoteIdParams = z.infer<typeof noteIdSchema>
+export type ProcessNoteInput = z.infer<typeof processNoteSchema>
