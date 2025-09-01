@@ -50,12 +50,12 @@
   - [x] SUB-006-04: Add visual recording indicator (red dot) and timer display
   - [x] SUB-006-05: Save recorded audio as blob and prepare for transcription API call
 
-- [ ] **US-007**: Create voice transcription API with OpenAI Whisper
-  - [ ] SUB-007-01: Create `app/api/transcribe/route.ts` endpoint accepting FormData with audio file
-  - [ ] SUB-007-02: Install and configure OpenAI SDK: add OPENAI_API_KEY to environment variables
-  - [ ] SUB-007-03: Implement Whisper API call in transcribe endpoint with error handling
-  - [ ] SUB-007-04: Add audio file validation (format, size limits) before processing
-  - [ ] SUB-007-05: Return transcribed text as JSON response with confidence score if available
+- [x] **US-007**: Create voice transcription API with OpenAI Whisper
+  - [x] SUB-007-01: Create `app/api/transcribe/route.ts` endpoint accepting FormData with audio file
+  - [x] SUB-007-02: Install and configure OpenAI SDK: add OPENAI_API_KEY to environment variables
+  - [x] SUB-007-03: Implement Whisper API call in transcribe endpoint with error handling
+  - [x] SUB-007-04: Add audio file validation (format, size limits) before processing
+  - [x] SUB-007-05: Return transcribed text as JSON response with confidence score if available
 
 ## AI Processing & Enhancement
 
@@ -146,16 +146,16 @@
 ## Progress Tracking
 
 - **Total User Stories**: 17
-- **Completed User Stories**: 6/17 (35.29%)
+- **Completed User Stories**: 7/17 (41.18%)
 - **Total Sub-Tasks**: 85
-- **Completed Sub-Tasks**: 30/85 (35.29%)
-- **Current Progress**: 35.29%
+- **Completed Sub-Tasks**: 35/85 (41.18%)
+- **Current Progress**: 41.18%
 
 ### Completion Status by Category:
 - [x] **Project Setup & Configuration** (2 user stories) ✅
 - [x] **Authentication & User Management** (1 user story) ✅
 - [x] **Database & Backend Setup** (2 user stories) ✅
-- [~] **Voice Input & Transcription** (1/2 user stories) 🔄
+- [x] **Voice Input & Transcription** (2/2 user stories) ✅
 - [ ] **AI Processing & Enhancement** (2 user stories)
 - [ ] **User Interface & Experience** (2 user stories)
 - [ ] **Chat Interface & Conversation** (2 user stories)
