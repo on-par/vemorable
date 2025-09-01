@@ -9,12 +9,12 @@
   - [x] SUB-001-04: Create `.env.example` file with all required environment variable names
   - [x] SUB-001-05: Update `next.config.js` to allow audio file uploads and configure domains
 
-- [ ] **US-002**: Set up project structure and configuration files
-  - [ ] SUB-002-01: Create folder structure: `src/components/`, `src/lib/`, `src/types/`, `src/hooks/`
-  - [ ] SUB-002-02: Create `src/lib/supabase.ts` file for Supabase client configuration
-  - [ ] SUB-002-03: Create `src/types/database.ts` file for TypeScript database types
-  - [ ] SUB-002-04: Update `package.json` scripts to include `"db:generate": "prisma generate"`
-  - [ ] SUB-002-05: Create `README.md` with setup instructions and environment variable explanations
+- [x] **US-002**: Set up project structure and configuration files
+  - [x] SUB-002-01: Create folder structure: `src/components/`, `src/lib/`, `src/types/`, `src/hooks/`
+  - [x] SUB-002-02: Create `src/lib/supabase.ts` file for Supabase client configuration
+  - [x] SUB-002-03: Create `src/types/database.ts` file for TypeScript database types
+  - [x] SUB-002-04: Update `package.json` scripts to include `"db:generate": "prisma generate"`
+  - [x] SUB-002-05: Create `README.md` with setup instructions and environment variable explanations
 
 ## Authentication & User Management
 
@@ -146,10 +146,10 @@
 ## Progress Tracking
 
 - **Total User Stories**: 17
-- **Completed User Stories**: 1/17 (5.88%)
+- **Completed User Stories**: 2/17 (11.76%)
 - **Total Sub-Tasks**: 85
-- **Completed Sub-Tasks**: 5/85 (5.88%)
-- **Current Progress**: 5.88%
+- **Completed Sub-Tasks**: 10/85 (11.76%)
+- **Current Progress**: 11.76%
 
 ### Completion Status by Category:
 - [ ] **Project Setup & Configuration** (2 user stories)
