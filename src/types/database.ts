@@ -19,6 +19,10 @@ export interface Database {
           summary: string | null
           tags: string[] | null
           embedding: string | null
+          file_url: string | null
+          file_name: string | null
+          file_type: string | null
+          file_size: number | null
           created_at: string
           updated_at: string
         }
@@ -31,6 +35,10 @@ export interface Database {
           summary?: string | null
           tags?: string[] | null
           embedding?: string | null
+          file_url?: string | null
+          file_name?: string | null
+          file_type?: string | null
+          file_size?: number | null
           created_at?: string
           updated_at?: string
         }
@@ -43,6 +51,10 @@ export interface Database {
           summary?: string | null
           tags?: string[] | null
           embedding?: string | null
+          file_url?: string | null
+          file_name?: string | null
+          file_type?: string | null
+          file_size?: number | null
           created_at?: string
           updated_at?: string
         }

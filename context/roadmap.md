@@ -98,12 +98,12 @@
   - [x] SUB-012-04: Add `src/components/MessageBubble.tsx` for user and assistant messages
   - [x] SUB-012-05: Create chat session persistence in database with automatic saving
 
-- [ ] **US-013**: Add file upload capability for documents and images
-  - [ ] SUB-013-01: Create `src/components/FileUpload.tsx` with drag-and-drop interface
-  - [ ] SUB-013-02: Set up file storage using Supabase Storage bucket
-  - [ ] SUB-013-03: Create `app/api/upload/route.ts` for handling file uploads
-  - [ ] SUB-013-04: Add PDF text extraction using `pdf-parse` npm package
-  - [ ] SUB-013-05: Store extracted text as new notes with file reference
+- [x] **US-013**: Add file upload capability for documents and images
+  - [x] SUB-013-01: Create `src/components/FileUpload.tsx` with drag-and-drop interface
+  - [x] SUB-013-02: Set up file storage using Supabase Storage bucket
+  - [x] SUB-013-03: Create `app/api/upload/route.ts` for handling file uploads
+  - [x] SUB-013-04: Add PDF text extraction using `pdf-parse` npm package
+  - [x] SUB-013-05: Store extracted text as new notes with file reference
 
 ## Search & Organization
 
@@ -146,10 +146,10 @@
 ## Progress Tracking
 
 - **Total User Stories**: 17
-- **Completed User Stories**: 12/17 (70.59%)
+- **Completed User Stories**: 13/17 (76.47%)
 - **Total Sub-Tasks**: 85
-- **Completed Sub-Tasks**: 60/85 (70.59%)
-- **Current Progress**: 70.59%
+- **Completed Sub-Tasks**: 65/85 (76.47%)
+- **Current Progress**: 76.47%
 
 ### Completion Status by Category:
 - [x] **Project Setup & Configuration** (2 user stories) ✅
@@ -158,7 +158,7 @@
 - [x] **Voice Input & Transcription** (2/2 user stories) ✅
 - [x] **AI Processing & Enhancement** (2/2 user stories) ✅
 - [x] **User Interface & Experience** (2/2 user stories) ✅
-- [x] **Chat Interface & Conversation** (1/2 user stories)
+- [x] **Chat Interface & Conversation** (2/2 user stories) ✅
 - [ ] **Search & Organization** (1 user story)
 - [ ] **Data Export & Backup** (1 user story)
 - [ ] **Testing & Quality Assurance** (1 user story)
