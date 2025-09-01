@@ -7,6 +7,7 @@ import {
   getAuthenticatedUserId,
 } from '@/lib/api-utils'
 import { Database } from '@/types/database'
+import { generateNoteEmbedding, formatEmbeddingForPgVector } from '@/lib/embeddings'
 
 export async function GET(request: NextRequest) {
   try {
@@ -67,9 +68,25 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validatedData = createNoteSchema.parse(body)
 
+    // Generate embedding for the note
+    let embeddingVector: string | null = null
+    try {
+      const embeddingResult = await generateNoteEmbedding(
+        validatedData.title,
+        validatedData.processed_content,
+        validatedData.tags
+      )
+      embeddingVector = formatEmbeddingForPgVector(embeddingResult.embedding)
+    } catch (embeddingError) {
+      console.error('Failed to generate embedding:', embeddingError)
+      // Continue without embedding - we don't want to fail note creation
+      // just because embedding generation failed
+    }
+
     const noteData: Database['public']['Tables']['notes']['Insert'] = {
       ...validatedData,
       user_id: userId,
+      embedding: embeddingVector,
     }
 
     const { data: note, error } = await (supabase
