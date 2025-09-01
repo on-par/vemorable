@@ -1,7 +1,3 @@
----
-
----
-
 # VemoRable Development Process - Claude Code Implementation Guide
 
 ## Your Role

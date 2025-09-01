@@ -10,7 +10,7 @@ THINKING_LEVEL="think"
 DEFAULT_PROMPT_FILE="./.claude/commands/prompterate.md"
 
 # Valid thinking levels
-VALID_THINKING_LEVELS=("think" "think hard" "think harder" "ultrathink")
+VALID_THINKING_LEVELS=("think" "think hard" "think harder" "think hardest" "ultrathink")
 
 # Function to show usage
 show_help() {
@@ -22,7 +22,7 @@ show_help() {
     echo "  --prompt TEXT           Plain text prompt instructions"
     echo "  --prompt-file PATH      Path to prompt file"
     echo "  --iterations N          Number of loops (default: 1)"
-    echo "  --thinking-level LEVEL  Thinking level: think, think hard, think harder, ultrathink (default: think)"
+    echo "  --thinking-level LEVEL  Thinking level: think, think hard, think harder, think hardest, ultrathink (default: think)"
     echo "  --help                  Show this help message"
     echo ""
     echo "Notes:"
