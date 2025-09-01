@@ -27,12 +27,12 @@
 
 ## Database & Backend Setup
 
-- [ ] **US-004**: Configure Supabase database with required tables
-  - [ ] SUB-004-01: Create Supabase project, get URL and anon key for `.env.local`
-  - [ ] SUB-004-02: Enable pgvector extension in Supabase SQL Editor: `CREATE EXTENSION IF NOT EXISTS vector;`
-  - [ ] SUB-004-03: Create `supabase/migrations/001_initial_schema.sql` with notes and chat tables schema
-  - [ ] SUB-004-04: Run migration in Supabase SQL Editor to create all tables
-  - [ ] SUB-004-05: Test Supabase connection by creating `src/lib/supabase.ts` client file
+- [x] **US-004**: Configure Supabase database with required tables
+  - [x] SUB-004-01: Create Supabase project, get URL and anon key for `.env.local`
+  - [x] SUB-004-02: Enable pgvector extension in Supabase SQL Editor: `CREATE EXTENSION IF NOT EXISTS vector;`
+  - [x] SUB-004-03: Create `supabase/migrations/001_initial_schema.sql` with notes and chat tables schema
+  - [x] SUB-004-04: Run migration in Supabase SQL Editor to create all tables
+  - [x] SUB-004-05: Test Supabase connection by creating `src/lib/supabase.ts` client file
 
 - [ ] **US-005**: Create API routes for note management operations
   - [ ] SUB-005-01: Create `app/api/notes/route.ts` with POST (create) and GET (list) handlers
@@ -146,10 +146,10 @@
 ## Progress Tracking
 
 - **Total User Stories**: 17
-- **Completed User Stories**: 3/17 (17.65%)
+- **Completed User Stories**: 4/17 (23.53%)
 - **Total Sub-Tasks**: 85
-- **Completed Sub-Tasks**: 15/85 (17.65%)
-- **Current Progress**: 17.65%
+- **Completed Sub-Tasks**: 20/85 (23.53%)
+- **Current Progress**: 23.53%
 
 ### Completion Status by Category:
 - [x] **Project Setup & Configuration** (2 user stories) ✅
