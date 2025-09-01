@@ -66,12 +66,12 @@
   - [x] SUB-008-04: Add title and summary generation function with structured output
   - [x] SUB-008-05: Create auto-tagging function returning array of relevant tags
 
-- [ ] **US-009**: Build vector search capabilities for note retrieval
-  - [ ] SUB-009-01: Create `src/lib/embeddings.ts` file with OpenAI embedding functions
-  - [ ] SUB-009-02: Add embedding generation to note creation process in API
-  - [ ] SUB-009-03: Create `app/api/search/route.ts` for semantic search using pgvector
-  - [ ] SUB-009-04: Implement similarity search SQL query in `src/lib/database.ts`
-  - [ ] SUB-009-05: Test search functionality with sample notes and queries
+- [x] **US-009**: Build vector search capabilities for note retrieval
+  - [x] SUB-009-01: Create `src/lib/embeddings.ts` file with OpenAI embedding functions
+  - [x] SUB-009-02: Add embedding generation to note creation process in API
+  - [x] SUB-009-03: Create `app/api/search/route.ts` for semantic search using pgvector
+  - [x] SUB-009-04: Implement similarity search SQL query in `src/lib/database.ts`
+  - [x] SUB-009-05: Test search functionality with sample notes and queries
 
 ## User Interface & Experience
 
@@ -146,17 +146,17 @@
 ## Progress Tracking
 
 - **Total User Stories**: 17
-- **Completed User Stories**: 8/17 (47.06%)
+- **Completed User Stories**: 9/17 (52.94%)
 - **Total Sub-Tasks**: 85
-- **Completed Sub-Tasks**: 40/85 (47.06%)
-- **Current Progress**: 47.06%
+- **Completed Sub-Tasks**: 45/85 (52.94%)
+- **Current Progress**: 52.94%
 
 ### Completion Status by Category:
 - [x] **Project Setup & Configuration** (2 user stories) ✅
 - [x] **Authentication & User Management** (1 user story) ✅
 - [x] **Database & Backend Setup** (2 user stories) ✅
 - [x] **Voice Input & Transcription** (2/2 user stories) ✅
-- [ ] **AI Processing & Enhancement** (1/2 user stories)
+- [x] **AI Processing & Enhancement** (2/2 user stories) ✅
 - [ ] **User Interface & Experience** (2 user stories)
 - [ ] **Chat Interface & Conversation** (2 user stories)
 - [ ] **Search & Organization** (1 user story)
