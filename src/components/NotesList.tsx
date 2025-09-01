@@ -3,6 +3,8 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import NoteCard from './NoteCard';
 import NoteDetail from './NoteDetail';
+import TagFilter from './TagFilter';
+import DateRangePicker from './DateRangePicker';
 
 interface Note {
   id: string;
@@ -26,7 +28,10 @@ export default function NotesList({ notes, onNoteDeleted, onNoteUpdated }: Notes
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'alphabetical'>('newest');
   const [favoriteNotes, setFavoriteNotes] = useState<Set<string>>(new Set());
-  const [showFilters, setShowFilters] = useState(false);
+  const [dateRange, setDateRange] = useState<{ startDate: Date | null; endDate: Date | null }>({
+    startDate: null,
+    endDate: null,
+  });
 
   // Extract all unique tags from notes
   const allTags = useMemo(() => {
@@ -59,6 +64,25 @@ export default function NotesList({ notes, onNoteDeleted, onNoteUpdated }: Notes
       );
     }
 
+    // Apply date range filter
+    if (dateRange.startDate || dateRange.endDate) {
+      filtered = filtered.filter(note => {
+        const noteDate = new Date(note.created_at);
+        if (dateRange.startDate && noteDate < dateRange.startDate) {
+          return false;
+        }
+        if (dateRange.endDate) {
+          // Set end date to end of day for inclusive filtering
+          const endOfDay = new Date(dateRange.endDate);
+          endOfDay.setHours(23, 59, 59, 999);
+          if (noteDate > endOfDay) {
+            return false;
+          }
+        }
+        return true;
+      });
+    }
+
     // Apply sorting
     const sorted = [...filtered].sort((a, b) => {
       switch (sortBy) {
@@ -74,7 +98,7 @@ export default function NotesList({ notes, onNoteDeleted, onNoteUpdated }: Notes
     });
 
     return sorted;
-  }, [notes, searchQuery, selectedTags, sortBy]);
+  }, [notes, searchQuery, selectedTags, sortBy, dateRange]);
 
   const handleNoteClick = useCallback((note: Note) => {
     setSelectedNote(note);
@@ -125,9 +149,18 @@ export default function NotesList({ notes, onNoteDeleted, onNoteUpdated }: Notes
     setSearchQuery('');
     setSelectedTags([]);
     setSortBy('newest');
+    setDateRange({ startDate: null, endDate: null });
   };
 
-  const hasActiveFilters = searchQuery || selectedTags.length > 0 || sortBy !== 'newest';
+  const clearTagFilters = () => {
+    setSelectedTags([]);
+  };
+
+  const clearDateFilter = () => {
+    setDateRange({ startDate: null, endDate: null });
+  };
+
+  const hasActiveFilters = searchQuery || selectedTags.length > 0 || sortBy !== 'newest' || dateRange.startDate || dateRange.endDate;
 
   if (notes.length === 0) {
     return (
@@ -183,28 +216,26 @@ export default function NotesList({ notes, onNoteDeleted, onNoteUpdated }: Notes
 
         {/* Filter Controls */}
         <div className="flex flex-wrap items-center gap-3">
-          {/* Filter Toggle Button */}
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="px-3 py-1.5 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors flex items-center gap-2"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-            </svg>
-            Filters
-            {(selectedTags.length > 0 || sortBy !== 'newest') && (
-              <span className="px-1.5 py-0.5 text-xs bg-blue-600 text-white rounded-full">
-                {selectedTags.length + (sortBy !== 'newest' ? 1 : 0)}
-              </span>
-            )}
-          </button>
+          {/* Tag Filter Dropdown */}
+          <TagFilter
+            allTags={allTags}
+            selectedTags={selectedTags}
+            onTagToggle={handleTagToggle}
+            onClearTags={clearTagFilters}
+          />
+
+          {/* Date Range Picker */}
+          <DateRangePicker
+            value={dateRange}
+            onChange={setDateRange}
+            onClear={clearDateFilter}
+          />
 
           {/* Sort Dropdown */}
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-            className="px-3 py-1.5 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             <option value="newest">Newest First</option>
             <option value="oldest">Oldest First</option>
@@ -215,39 +246,17 @@ export default function NotesList({ notes, onNoteDeleted, onNoteUpdated }: Notes
           {hasActiveFilters && (
             <button
               onClick={clearAllFilters}
-              className="px-3 py-1.5 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+              className="px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
             >
               Clear all filters
             </button>
           )}
 
           {/* Results Count */}
-          <span className="text-sm text-gray-500">
+          <span className="ml-auto text-sm text-gray-500">
             {filteredAndSortedNotes.length} {filteredAndSortedNotes.length === 1 ? 'note' : 'notes'}
           </span>
         </div>
-
-        {/* Expanded Filters */}
-        {showFilters && allTags.length > 0 && (
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">Filter by tags:</h3>
-            <div className="flex flex-wrap gap-2">
-              {allTags.map(tag => (
-                <button
-                  key={tag}
-                  onClick={() => handleTagToggle(tag)}
-                  className={`px-3 py-1 text-sm rounded-full transition-colors ${
-                    selectedTags.includes(tag)
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
-                  }`}
-                >
-                  {tag}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Notes Grid */}
