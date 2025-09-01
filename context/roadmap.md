@@ -43,12 +43,12 @@
 
 ## Voice Input & Transcription
 
-- [ ] **US-006**: Implement voice recording functionality in the browser
-  - [ ] SUB-006-01: Create `src/hooks/useVoiceRecording.ts` hook using browser MediaRecorder API
-  - [ ] SUB-006-02: Create `src/components/VoiceRecorder.tsx` component with start/stop button
-  - [ ] SUB-006-03: Add microphone permission request and error handling in the hook
-  - [ ] SUB-006-04: Add visual recording indicator (red dot) and timer display
-  - [ ] SUB-006-05: Save recorded audio as blob and prepare for transcription API call
+- [x] **US-006**: Implement voice recording functionality in the browser
+  - [x] SUB-006-01: Create `src/hooks/useVoiceRecording.ts` hook using browser MediaRecorder API
+  - [x] SUB-006-02: Create `src/components/VoiceRecorder.tsx` component with start/stop button
+  - [x] SUB-006-03: Add microphone permission request and error handling in the hook
+  - [x] SUB-006-04: Add visual recording indicator (red dot) and timer display
+  - [x] SUB-006-05: Save recorded audio as blob and prepare for transcription API call
 
 - [ ] **US-007**: Create voice transcription API with OpenAI Whisper
   - [ ] SUB-007-01: Create `app/api/transcribe/route.ts` endpoint accepting FormData with audio file
@@ -146,16 +146,16 @@
 ## Progress Tracking
 
 - **Total User Stories**: 17
-- **Completed User Stories**: 5/17 (29.41%)
+- **Completed User Stories**: 6/17 (35.29%)
 - **Total Sub-Tasks**: 85
-- **Completed Sub-Tasks**: 25/85 (29.41%)
-- **Current Progress**: 29.41%
+- **Completed Sub-Tasks**: 30/85 (35.29%)
+- **Current Progress**: 35.29%
 
 ### Completion Status by Category:
 - [x] **Project Setup & Configuration** (2 user stories) ✅
 - [x] **Authentication & User Management** (1 user story) ✅
 - [x] **Database & Backend Setup** (2 user stories) ✅
-- [ ] **Voice Input & Transcription** (2 user stories)
+- [~] **Voice Input & Transcription** (1/2 user stories) 🔄
 - [ ] **AI Processing & Enhancement** (2 user stories)
 - [ ] **User Interface & Experience** (2 user stories)
 - [ ] **Chat Interface & Conversation** (2 user stories)
