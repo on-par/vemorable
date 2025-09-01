@@ -34,12 +34,12 @@
   - [x] SUB-004-04: Run migration in Supabase SQL Editor to create all tables
   - [x] SUB-004-05: Test Supabase connection by creating `src/lib/supabase.ts` client file
 
-- [ ] **US-005**: Create API routes for note management operations
-  - [ ] SUB-005-01: Create `app/api/notes/route.ts` with POST (create) and GET (list) handlers
-  - [ ] SUB-005-02: Create `app/api/notes/[id]/route.ts` with GET, PUT, and DELETE handlers
-  - [ ] SUB-005-03: Add Zod validation schema in `src/lib/validations.ts` for note creation
-  - [ ] SUB-005-04: Add error handling middleware function in `src/lib/api-utils.ts`
-  - [ ] SUB-005-05: Test API routes using Thunder Client or Postman with sample data
+- [x] **US-005**: Create API routes for note management operations
+  - [x] SUB-005-01: Create `app/api/notes/route.ts` with POST (create) and GET (list) handlers
+  - [x] SUB-005-02: Create `app/api/notes/[id]/route.ts` with GET, PUT, and DELETE handlers
+  - [x] SUB-005-03: Add Zod validation schema in `src/lib/validations.ts` for note creation
+  - [x] SUB-005-04: Add error handling middleware function in `src/lib/api-utils.ts`
+  - [x] SUB-005-05: Test API routes using Thunder Client or Postman with sample data
 
 ## Voice Input & Transcription
 
@@ -146,15 +146,15 @@
 ## Progress Tracking
 
 - **Total User Stories**: 17
-- **Completed User Stories**: 4/17 (23.53%)
+- **Completed User Stories**: 5/17 (29.41%)
 - **Total Sub-Tasks**: 85
-- **Completed Sub-Tasks**: 20/85 (23.53%)
-- **Current Progress**: 23.53%
+- **Completed Sub-Tasks**: 25/85 (29.41%)
+- **Current Progress**: 29.41%
 
 ### Completion Status by Category:
 - [x] **Project Setup & Configuration** (2 user stories) ✅
 - [x] **Authentication & User Management** (1 user story) ✅
-- [ ] **Database & Backend Setup** (2 user stories)
+- [x] **Database & Backend Setup** (2 user stories) ✅
 - [ ] **Voice Input & Transcription** (2 user stories)
 - [ ] **AI Processing & Enhancement** (2 user stories)
 - [ ] **User Interface & Experience** (2 user stories)
