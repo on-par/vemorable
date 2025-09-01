@@ -2,12 +2,12 @@
 
 ## Project Setup & Configuration
 
-- [ ] **US-001**: Initialize Next.js project with TypeScript and required dependencies
-  - [ ] SUB-001-01: Run `npx create-next-app@latest vemorable --typescript --tailwind --eslint --app --src-dir`
-  - [ ] SUB-001-02: Install dependencies: `npm install @clerk/nextjs @supabase/supabase-js openai @supabase/ssr`
-  - [ ] SUB-001-03: Install dev dependencies: `npm install -D @types/node prisma`
-  - [ ] SUB-001-04: Create `.env.example` file with all required environment variable names
-  - [ ] SUB-001-05: Update `next.config.js` to allow audio file uploads and configure domains
+- [x] **US-001**: Initialize Next.js project with TypeScript and required dependencies
+  - [x] SUB-001-01: Run `npx create-next-app@latest vemorable --typescript --tailwind --eslint --app --src-dir`
+  - [x] SUB-001-02: Install dependencies: `npm install @clerk/nextjs @supabase/supabase-js openai @supabase/ssr`
+  - [x] SUB-001-03: Install dev dependencies: `npm install -D @types/node prisma`
+  - [x] SUB-001-04: Create `.env.example` file with all required environment variable names
+  - [x] SUB-001-05: Update `next.config.js` to allow audio file uploads and configure domains
 
 - [ ] **US-002**: Set up project structure and configuration files
   - [ ] SUB-002-01: Create folder structure: `src/components/`, `src/lib/`, `src/types/`, `src/hooks/`
@@ -146,10 +146,10 @@
 ## Progress Tracking
 
 - **Total User Stories**: 17
-- **Completed User Stories**: 0/17 (0%)
+- **Completed User Stories**: 1/17 (5.88%)
 - **Total Sub-Tasks**: 85
-- **Completed Sub-Tasks**: 0/85 (0%)
-- **Current Progress**: 0%
+- **Completed Sub-Tasks**: 5/85 (5.88%)
+- **Current Progress**: 5.88%
 
 ### Completion Status by Category:
 - [ ] **Project Setup & Configuration** (2 user stories)
