@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { VoiceRecorder } from './VoiceRecorder';
+import { FileUpload } from './FileUpload';
 import { useAuth } from '@clerk/nextjs';
 
 interface Note {
@@ -22,11 +23,12 @@ interface VoiceNoteModalProps {
 
 export default function VoiceNoteModal({ isOpen, onClose, onNoteCreated }: VoiceNoteModalProps) {
   const { userId } = useAuth();
-  const [mode, setMode] = useState<'voice' | 'text'>('voice');
+  const [mode, setMode] = useState<'voice' | 'text' | 'file'>('voice');
   const [textContent, setTextContent] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   // Reset state when modal closes
   useEffect(() => {
@@ -35,6 +37,7 @@ export default function VoiceNoteModal({ isOpen, onClose, onNoteCreated }: Voice
       setTextContent('');
       setError(null);
       setAudioBlob(null);
+      setSelectedFiles([]);
       setIsProcessing(false);
     }
   }, [isOpen]);
@@ -167,6 +170,47 @@ export default function VoiceNoteModal({ isOpen, onClose, onNoteCreated }: Voice
     }
   };
 
+  // Handle file selection
+  const handleFileSelect = (files: File[]) => {
+    setSelectedFiles(files);
+    setError(null);
+  };
+
+  // Handle file upload and note creation
+  const handleFileUpload = async () => {
+    if (selectedFiles.length === 0 || !userId) return;
+
+    setIsProcessing(true);
+    setError(null);
+
+    try {
+      for (const file of selectedFiles) {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('processWithAI', 'true');
+
+        const response = await fetch('/api/upload-note', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error?.message || 'Failed to upload file');
+        }
+
+        const { data } = await response.json();
+        onNoteCreated(data.note);
+      }
+      
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to upload files');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -214,6 +258,19 @@ export default function VoiceNoteModal({ isOpen, onClose, onNoteCreated }: Voice
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
               </svg>
               Text Note
+            </button>
+            <button
+              onClick={() => setMode('file')}
+              className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
+                mode === 'file'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <svg className="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+              Upload File
             </button>
           </div>
         </div>
@@ -273,6 +330,31 @@ export default function VoiceNoteModal({ isOpen, onClose, onNoteCreated }: Voice
                   Save Note
                 </button>
               </div>
+            </div>
+          )}
+
+          {mode === 'file' && (
+            <div>
+              <FileUpload
+                onFileSelect={handleFileSelect}
+                onError={setError}
+                maxFiles={5}
+                className="mb-4"
+              />
+              
+              {selectedFiles.length > 0 && !isProcessing && (
+                <div className="mt-6 flex justify-center">
+                  <button
+                    onClick={handleFileUpload}
+                    className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Process {selectedFiles.length} File{selectedFiles.length > 1 ? 's' : ''}
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
