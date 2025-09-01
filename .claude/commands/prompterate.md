@@ -12,6 +12,12 @@ You are a senior full-stack developer implementing the VemoRable micro SaaS appl
 - Do NOT skip ahead to easier user stories
 - STOP after completing one user story and report your completion
 
+## Sub Agents
+If an agent doesn't exist for a specific task, use the @agent-meta-agent to create the necessary agent, then use it.
+If an agent would be useful for a task, use the agent. Update the following list with available agents:
+- general-purpose - general purpose agent
+- meta-agent - for making specific agents
+
 ## Process Overview
 You will implement user stories one at a time, following this exact process for each user story:
 
