@@ -116,12 +116,12 @@
 
 ## Data Export & Backup
 
-- [ ] **US-015**: Add basic data export functionality
-  - [ ] SUB-015-01: Create `app/api/export/route.ts` endpoint for user data export
-  - [ ] SUB-015-02: Generate JSON export containing all user notes and metadata
-  - [ ] SUB-015-03: Add export button in user profile/settings area
-  - [ ] SUB-015-04: Create download link for generated export file
-  - [ ] SUB-015-05: Add export progress indicator and success message
+- [x] **US-015**: Add basic data export functionality
+  - [x] SUB-015-01: Create `app/api/export/route.ts` endpoint for user data export
+  - [x] SUB-015-02: Generate JSON export containing all user notes and metadata
+  - [x] SUB-015-03: Add export button in user profile/settings area
+  - [x] SUB-015-04: Create download link for generated export file
+  - [x] SUB-015-05: Add export progress indicator and success message
 
 ## Testing & Quality Assurance
 
@@ -141,15 +141,27 @@
   - [ ] SUB-017-04: Add basic analytics using Vercel Analytics
   - [ ] SUB-017-05: Test production deployment with all features working
 
+## Landing Page & Public Experience
+
+- [x] **US-018**: Create landing page and public-facing experience
+  - [x] SUB-018-01: Replace default Next.js page.tsx with proper VemoRable landing page
+  - [x] SUB-018-02: Create hero section with value proposition and CTA to sign up
+  - [x] SUB-018-03: Add features section showcasing key capabilities (voice notes, AI processing, chat)
+  - [x] SUB-018-04: Create navigation bar with sign in/sign up buttons for unauthenticated users
+  - [x] SUB-018-05: Add automatic redirect to dashboard for authenticated users
+  - [x] SUB-018-06: Create responsive mobile layout for landing page
+  - [x] SUB-018-07: Add testimonials or social proof section
+  - [x] SUB-018-08: Create footer with links to privacy policy and terms
+
 ---
 
 ## Progress Tracking
 
-- **Total User Stories**: 17
-- **Completed User Stories**: 14/17 (82.35%)
-- **Total Sub-Tasks**: 85
-- **Completed Sub-Tasks**: 70/85 (82.35%)
-- **Current Progress**: 82.35%
+- **Total User Stories**: 18
+- **Completed User Stories**: 16/18 (88.89%)
+- **Total Sub-Tasks**: 93
+- **Completed Sub-Tasks**: 83/93 (89.25%)
+- **Current Progress**: 89.25%
 
 ### Completion Status by Category:
 - [x] **Project Setup & Configuration** (2 user stories) ✅
@@ -160,9 +172,10 @@
 - [x] **User Interface & Experience** (2/2 user stories) ✅
 - [x] **Chat Interface & Conversation** (2/2 user stories) ✅
 - [x] **Search & Organization** (1/1 user story) ✅
-- [ ] **Data Export & Backup** (1 user story)
+- [x] **Data Export & Backup** (1/1 user story) ✅
 - [ ] **Testing & Quality Assurance** (1 user story)
 - [ ] **Deployment & Production Setup** (1 user story)
+- [x] **Landing Page & Public Experience** (1 user story) ✅
 
 ---
 
