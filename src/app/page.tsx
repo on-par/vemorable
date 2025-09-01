@@ -182,7 +182,7 @@ export default function Home() {
               Loved by Thinkers and Creators
             </h2>
             <p className="text-xl text-gray-600">
-              Join thousands who've transformed their note-taking experience
+              Join thousands who&apos;ve transformed their note-taking experience
             </p>
           </div>
 
@@ -196,7 +196,7 @@ export default function Home() {
                 ))}
               </div>
               <p className="text-gray-600 mb-4">
-                "As someone with ADHD, VemoRable has been a game-changer. I can finally capture my scattered thoughts and actually find them later!"
+                &quot;As someone with ADHD, VemoRable has been a game-changer. I can finally capture my scattered thoughts and actually find them later!&quot;
               </p>
               <div className="font-semibold text-gray-900">Sarah Chen</div>
               <div className="text-sm text-gray-500">Product Designer</div>
@@ -211,7 +211,7 @@ export default function Home() {
                 ))}
               </div>
               <p className="text-gray-600 mb-4">
-                "The AI chat feature is incredible. It's like having a conversation with my past self. Perfect for research and writing."
+                &quot;The AI chat feature is incredible. It&apos;s like having a conversation with my past self. Perfect for research and writing.&quot;
               </p>
               <div className="font-semibold text-gray-900">Marcus Johnson</div>
               <div className="text-sm text-gray-500">PhD Researcher</div>
@@ -226,7 +226,7 @@ export default function Home() {
                 ))}
               </div>
               <p className="text-gray-600 mb-4">
-                "I process information verbally, and VemoRable gets that. Speaking my thoughts and having them organized automatically is magical."
+                &quot;I process information verbally, and VemoRable gets that. Speaking my thoughts and having them organized automatically is magical.&quot;
               </p>
               <div className="font-semibold text-gray-900">Emily Rodriguez</div>
               <div className="text-sm text-gray-500">Executive Coach</div>
