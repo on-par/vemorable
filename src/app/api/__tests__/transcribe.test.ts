@@ -240,7 +240,7 @@ describe('/api/transcribe', () => {
         401,
         { error: { message: 'Invalid API key' } },
         'Invalid API key',
-        {}
+        new Headers()
       )
       mockOpenAI.audio.transcriptions.create.mockRejectedValue(apiError)
       
@@ -262,7 +262,7 @@ describe('/api/transcribe', () => {
         429,
         { error: { message: 'Rate limit exceeded' } },
         'Rate limit exceeded',
-        {}
+        new Headers()
       )
       mockOpenAI.audio.transcriptions.create.mockRejectedValue(apiError)
       
@@ -284,7 +284,7 @@ describe('/api/transcribe', () => {
         413,
         { error: { message: 'File too large' } },
         'File too large',
-        {}
+        new Headers()
       )
       mockOpenAI.audio.transcriptions.create.mockRejectedValue(apiError)
       
@@ -306,7 +306,7 @@ describe('/api/transcribe', () => {
         500,
         { error: { message: 'Internal server error' } },
         'Internal server error',
-        {}
+        new Headers()
       )
       mockOpenAI.audio.transcriptions.create.mockRejectedValue(apiError)
       
