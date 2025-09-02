@@ -39,7 +39,7 @@ jest.mock('openai', () => {
       },
     },
   }))
-  MockedOpenAI.APIError = MockAPIError
+  ;(MockedOpenAI as any).APIError = MockAPIError
   return MockedOpenAI
 })
 
