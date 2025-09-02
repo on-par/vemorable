@@ -8,7 +8,19 @@
   - [x] SUB-001-03: Install dev dependencies: `npm install -D @types/node prisma`
   - [x] SUB-001-04: Create `.env.example` file with all required environment variable names
   - [x] SUB-001-05: Update `next.config.js` to allow audio file uploads and configure domains
+- [x] **US-001**: Initialize Next.js project with TypeScript and required dependencies
+  - [x] SUB-001-01: Run `npx create-next-app@latest vemorable --typescript --tailwind --eslint --app --src-dir`
+  - [x] SUB-001-02: Install dependencies: `npm install @clerk/nextjs @supabase/supabase-js openai @supabase/ssr`
+  - [x] SUB-001-03: Install dev dependencies: `npm install -D @types/node prisma`
+  - [x] SUB-001-04: Create `.env.example` file with all required environment variable names
+  - [x] SUB-001-05: Update `next.config.js` to allow audio file uploads and configure domains
 
+- [x] **US-002**: Set up project structure and configuration files
+  - [x] SUB-002-01: Create folder structure: `src/components/`, `src/lib/`, `src/types/`, `src/hooks/`
+  - [x] SUB-002-02: Create `src/lib/supabase.ts` file for Supabase client configuration
+  - [x] SUB-002-03: Create `src/types/database.ts` file for TypeScript database types
+  - [x] SUB-002-04: Update `package.json` scripts to include `"db:generate": "prisma generate"`
+  - [x] SUB-002-05: Create `README.md` with setup instructions and environment variable explanations
 - [x] **US-002**: Set up project structure and configuration files
   - [x] SUB-002-01: Create folder structure: `src/components/`, `src/lib/`, `src/types/`, `src/hooks/`
   - [x] SUB-002-02: Create `src/lib/supabase.ts` file for Supabase client configuration
@@ -24,6 +36,12 @@
   - [x] SUB-003-03: Wrap `app/layout.tsx` with `<ClerkProvider>` component
   - [x] SUB-003-04: Create `app/sign-in/[[...sign-in]]/page.tsx` and `app/sign-up/[[...sign-up]]/page.tsx`
   - [x] SUB-003-05: Create `src/components/UserButton.tsx` component using Clerk's `<UserButton />`
+- [x] **US-003**: Integrate Clerk authentication for user management
+  - [x] SUB-003-01: Create Clerk account, get publishable key and secret key for `.env.local`
+  - [x] SUB-003-02: Create `src/middleware.ts` file with Clerk's authMiddleware configuration
+  - [x] SUB-003-03: Wrap `app/layout.tsx` with `<ClerkProvider>` component
+  - [x] SUB-003-04: Create `app/sign-in/[[...sign-in]]/page.tsx` and `app/sign-up/[[...sign-up]]/page.tsx`
+  - [x] SUB-003-05: Create `src/components/UserButton.tsx` component using Clerk's `<UserButton />`
 
 ## Database & Backend Setup
 
@@ -33,7 +51,19 @@
   - [x] SUB-004-03: Create `supabase/migrations/001_initial_schema.sql` with notes and chat tables schema
   - [x] SUB-004-04: Run migration in Supabase SQL Editor to create all tables
   - [x] SUB-004-05: Test Supabase connection by creating `src/lib/supabase.ts` client file
+- [x] **US-004**: Configure Supabase database with required tables
+  - [x] SUB-004-01: Create Supabase project, get URL and anon key for `.env.local`
+  - [x] SUB-004-02: Enable pgvector extension in Supabase SQL Editor: `CREATE EXTENSION IF NOT EXISTS vector;`
+  - [x] SUB-004-03: Create `supabase/migrations/001_initial_schema.sql` with notes and chat tables schema
+  - [x] SUB-004-04: Run migration in Supabase SQL Editor to create all tables
+  - [x] SUB-004-05: Test Supabase connection by creating `src/lib/supabase.ts` client file
 
+- [x] **US-005**: Create API routes for note management operations
+  - [x] SUB-005-01: Create `app/api/notes/route.ts` with POST (create) and GET (list) handlers
+  - [x] SUB-005-02: Create `app/api/notes/[id]/route.ts` with GET, PUT, and DELETE handlers
+  - [x] SUB-005-03: Add Zod validation schema in `src/lib/validations.ts` for note creation
+  - [x] SUB-005-04: Add error handling middleware function in `src/lib/api-utils.ts`
+  - [x] SUB-005-05: Test API routes using Thunder Client or Postman with sample data
 - [x] **US-005**: Create API routes for note management operations
   - [x] SUB-005-01: Create `app/api/notes/route.ts` with POST (create) and GET (list) handlers
   - [x] SUB-005-02: Create `app/api/notes/[id]/route.ts` with GET, PUT, and DELETE handlers
@@ -49,7 +79,19 @@
   - [x] SUB-006-03: Add microphone permission request and error handling in the hook
   - [x] SUB-006-04: Add visual recording indicator (red dot) and timer display
   - [x] SUB-006-05: Save recorded audio as blob and prepare for transcription API call
+- [x] **US-006**: Implement voice recording functionality in the browser
+  - [x] SUB-006-01: Create `src/hooks/useVoiceRecording.ts` hook using browser MediaRecorder API
+  - [x] SUB-006-02: Create `src/components/VoiceRecorder.tsx` component with start/stop button
+  - [x] SUB-006-03: Add microphone permission request and error handling in the hook
+  - [x] SUB-006-04: Add visual recording indicator (red dot) and timer display
+  - [x] SUB-006-05: Save recorded audio as blob and prepare for transcription API call
 
+- [x] **US-007**: Create voice transcription API with OpenAI Whisper
+  - [x] SUB-007-01: Create `app/api/transcribe/route.ts` endpoint accepting FormData with audio file
+  - [x] SUB-007-02: Install and configure OpenAI SDK: add OPENAI_API_KEY to environment variables
+  - [x] SUB-007-03: Implement Whisper API call in transcribe endpoint with error handling
+  - [x] SUB-007-04: Add audio file validation (format, size limits) before processing
+  - [x] SUB-007-05: Return transcribed text as JSON response with confidence score if available
 - [x] **US-007**: Create voice transcription API with OpenAI Whisper
   - [x] SUB-007-01: Create `app/api/transcribe/route.ts` endpoint accepting FormData with audio file
   - [x] SUB-007-02: Install and configure OpenAI SDK: add OPENAI_API_KEY to environment variables
@@ -65,7 +107,19 @@
   - [x] SUB-008-03: Implement transcript cleanup using GPT-3.5-turbo with specific system prompt
   - [x] SUB-008-04: Add title and summary generation function with structured output
   - [x] SUB-008-05: Create auto-tagging function returning array of relevant tags
+- [x] **US-008**: Implement AI-powered note processing and enhancement
+  - [x] SUB-008-01: Create `app/api/process-note/route.ts` endpoint accepting transcript text
+  - [x] SUB-008-02: Create `src/lib/openai.ts` with OpenAI client and helper functions
+  - [x] SUB-008-03: Implement transcript cleanup using GPT-3.5-turbo with specific system prompt
+  - [x] SUB-008-04: Add title and summary generation function with structured output
+  - [x] SUB-008-05: Create auto-tagging function returning array of relevant tags
 
+- [x] **US-009**: Build vector search capabilities for note retrieval
+  - [x] SUB-009-01: Create `src/lib/embeddings.ts` file with OpenAI embedding functions
+  - [x] SUB-009-02: Add embedding generation to note creation process in API
+  - [x] SUB-009-03: Create `app/api/search/route.ts` for semantic search using pgvector
+  - [x] SUB-009-04: Implement similarity search SQL query in `src/lib/database.ts`
+  - [x] SUB-009-05: Test search functionality with sample notes and queries
 - [x] **US-009**: Build vector search capabilities for note retrieval
   - [x] SUB-009-01: Create `src/lib/embeddings.ts` file with OpenAI embedding functions
   - [x] SUB-009-02: Add embedding generation to note creation process in API
@@ -81,7 +135,19 @@
   - [x] SUB-010-03: Create `src/components/VoiceNoteModal.tsx` with recording interface
   - [x] SUB-010-04: Add floating action button (`+`) to trigger note creation modal
   - [x] SUB-010-05: Implement text input alternative with `<textarea>` for typing notes
+- [x] **US-010**: Create main dashboard with note creation interface
+  - [x] SUB-010-01: Create `app/dashboard/page.tsx` with protected route wrapper
+  - [x] SUB-010-02: Create `src/components/Layout/DashboardLayout.tsx` with sidebar navigation
+  - [x] SUB-010-03: Create `src/components/VoiceNoteModal.tsx` with recording interface
+  - [x] SUB-010-04: Add floating action button (`+`) to trigger note creation modal
+  - [x] SUB-010-05: Implement text input alternative with `<textarea>` for typing notes
 
+- [x] **US-011**: Build notes list and management interface
+  - [x] SUB-011-01: Create `src/components/NotesList.tsx` component with grid layout
+  - [x] SUB-011-02: Create `src/components/NoteCard.tsx` with title, summary, tags, and date
+  - [x] SUB-011-03: Add search bar component with real-time filtering in `NotesList`
+  - [x] SUB-011-04: Implement note actions dropdown (edit, delete, favorite) on each card
+  - [x] SUB-011-05: Create `src/components/NoteDetail.tsx` modal for viewing full note content
 - [x] **US-011**: Build notes list and management interface
   - [x] SUB-011-01: Create `src/components/NotesList.tsx` component with grid layout
   - [x] SUB-011-02: Create `src/components/NoteCard.tsx` with title, summary, tags, and date
@@ -97,7 +163,19 @@
   - [x] SUB-012-03: Implement context retrieval by searching relevant notes for each query
   - [x] SUB-012-04: Add `src/components/MessageBubble.tsx` for user and assistant messages
   - [x] SUB-012-05: Create chat session persistence in database with automatic saving
+- [x] **US-012**: Implement chat interface for conversing with notes
+  - [x] SUB-012-01: Create `src/components/ChatInterface.tsx` with message list and input
+  - [x] SUB-012-02: Create `app/api/chat/route.ts` endpoint using OpenAI Chat API
+  - [x] SUB-012-03: Implement context retrieval by searching relevant notes for each query
+  - [x] SUB-012-04: Add `src/components/MessageBubble.tsx` for user and assistant messages
+  - [x] SUB-012-05: Create chat session persistence in database with automatic saving
 
+- [x] **US-013**: Add file upload capability for documents and images
+  - [x] SUB-013-01: Create `src/components/FileUpload.tsx` with drag-and-drop interface
+  - [x] SUB-013-02: Set up file storage using Supabase Storage bucket
+  - [x] SUB-013-03: Create `app/api/upload/route.ts` for handling file uploads
+  - [x] SUB-013-04: Add PDF text extraction using `pdf-parse` npm package
+  - [x] SUB-013-05: Store extracted text as new notes with file reference
 - [x] **US-013**: Add file upload capability for documents and images
   - [x] SUB-013-01: Create `src/components/FileUpload.tsx` with drag-and-drop interface
   - [x] SUB-013-02: Set up file storage using Supabase Storage bucket
@@ -113,6 +191,12 @@
   - [x] SUB-014-03: Add date range picker for filtering notes by creation date
   - [x] SUB-014-04: Implement sort options (newest, oldest, alphabetical) in notes list
   - [x] SUB-014-05: Add "Clear all filters" button to reset search and filters
+- [x] **US-014**: Implement basic search and filtering system
+  - [x] SUB-014-01: Add search functionality to `NotesList` component using text matching
+  - [x] SUB-014-02: Create tag filter dropdown component in `src/components/TagFilter.tsx`
+  - [x] SUB-014-03: Add date range picker for filtering notes by creation date
+  - [x] SUB-014-04: Implement sort options (newest, oldest, alphabetical) in notes list
+  - [x] SUB-014-05: Add "Clear all filters" button to reset search and filters
 
 ## Data Export & Backup
 
@@ -122,9 +206,21 @@
   - [x] SUB-015-03: Add export button in user profile/settings area
   - [x] SUB-015-04: Create download link for generated export file
   - [x] SUB-015-05: Add export progress indicator and success message
+- [x] **US-015**: Add basic data export functionality
+  - [x] SUB-015-01: Create `app/api/export/route.ts` endpoint for user data export
+  - [x] SUB-015-02: Generate JSON export containing all user notes and metadata
+  - [x] SUB-015-03: Add export button in user profile/settings area
+  - [x] SUB-015-04: Create download link for generated export file
+  - [x] SUB-015-05: Add export progress indicator and success message
 
 ## Testing & Quality Assurance
 
+- [x] **US-016**: Implement basic testing for core functionality
+  - [x] SUB-016-01: Set up Jest and React Testing Library with `npm install -D jest @testing-library/react`
+  - [x] SUB-016-02: Create `src/lib/__tests__/openai.test.ts` for AI utility function tests
+  - [x] SUB-016-03: Write component tests for `VoiceRecorder` and `NoteCard` components
+  - [x] SUB-016-04: Create API route tests for `/api/notes` and `/api/transcribe` endpoints
+  - [x] SUB-016-05: Set up test script in `package.json` and ensure all tests pass
 - [x] **US-016**: Implement basic testing for core functionality
   - [x] SUB-016-01: Set up Jest and React Testing Library with `npm install -D jest @testing-library/react`
   - [x] SUB-016-02: Create `src/lib/__tests__/openai.test.ts` for AI utility function tests
