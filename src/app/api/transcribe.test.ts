@@ -11,17 +11,36 @@ jest.mock('@/lib/api-utils', () => ({
   handleApiError: jest.fn(),
 }))
 
-// Global mock function that can be accessed from tests
-const mockTranscriptionCreate = jest.fn()
+// Create a shared mock that can be accessed from tests
+let mockTranscriptionsCreate = jest.fn()
 
 jest.mock('openai', () => {
-  return jest.fn().mockImplementation(() => ({
+  // Mock OpenAI.APIError class
+  class MockAPIError extends Error {
+    public status: number
+    public error: any
+    public message: string
+    public headers: Headers
+
+    constructor(status: number, error: any, message: string, headers: Headers) {
+      super(message)
+      this.status = status
+      this.error = error
+      this.message = message
+      this.headers = headers
+      this.name = 'APIError'
+    }
+  }
+
+  const MockedOpenAI = jest.fn().mockImplementation(() => ({
     audio: {
       transcriptions: {
-        create: mockTranscriptionCreate,
+        create: (...args: any[]) => mockTranscriptionsCreate(...args),
       },
     },
   }))
+  MockedOpenAI.APIError = MockAPIError
+  return MockedOpenAI
 })
 
 describe('/api/transcribe', () => {
@@ -29,6 +48,7 @@ describe('/api/transcribe', () => {
   
   beforeEach(() => {
     jest.clearAllMocks()
+    mockTranscriptionsCreate = jest.fn()
     ;(getAuthenticatedUserId as jest.Mock).mockResolvedValue(mockUserId)
     
     // Mock api-utils functions
@@ -86,7 +106,7 @@ describe('/api/transcribe', () => {
         ],
       }
       
-      mockTranscriptionCreate.mockResolvedValue(mockTranscription)
+      mockTranscriptionsCreate.mockResolvedValue(mockTranscription)
       
       const formData = new FormData()
       const audioFile = createMockAudioFile()
@@ -117,7 +137,7 @@ describe('/api/transcribe', () => {
       expect(data.data.confidence).toBeDefined()
       expect(data.data.metadata.model).toBe('whisper-1')
       
-      expect(mockTranscriptionCreate).toHaveBeenCalledWith(
+      expect(mockTranscriptionsCreate).toHaveBeenCalledWith(
         expect.objectContaining({
           file: expect.any(File),
           model: 'whisper-1',
@@ -133,7 +153,7 @@ describe('/api/transcribe', () => {
         language: 'en',
       }
       
-      mockTranscriptionCreate.mockResolvedValue(mockTranscription)
+      mockTranscriptionsCreate.mockResolvedValue(mockTranscription)
       
       const formData = new FormData()
       formData.append('audio', createMockAudioFile())
@@ -187,7 +207,7 @@ describe('/api/transcribe', () => {
       ]
 
       for (const format of validFormats) {
-        mockTranscriptionCreate.mockResolvedValue({
+        mockTranscriptionsCreate.mockResolvedValue({
           text: 'Test transcription',
         })
 
@@ -220,7 +240,7 @@ describe('/api/transcribe', () => {
     })
 
     it('should accept files with valid extensions even if MIME type is generic', async () => {
-      mockTranscriptionCreate.mockResolvedValue({
+      mockTranscriptionsCreate.mockResolvedValue({
         text: 'Test transcription',
       })
 
@@ -280,7 +300,7 @@ describe('/api/transcribe', () => {
         'Invalid API key',
         new Headers()
       )
-      mockTranscriptionCreate.mockRejectedValue(apiError)
+      mockTranscriptionsCreate.mockRejectedValue(apiError)
       
       const formData = new FormData()
       formData.append('audio', createMockAudioFile())
@@ -302,7 +322,7 @@ describe('/api/transcribe', () => {
         'Rate limit exceeded',
         new Headers()
       )
-      mockTranscriptionCreate.mockRejectedValue(apiError)
+      mockTranscriptionsCreate.mockRejectedValue(apiError)
       
       const formData = new FormData()
       formData.append('audio', createMockAudioFile())
@@ -324,7 +344,7 @@ describe('/api/transcribe', () => {
         'File too large',
         new Headers()
       )
-      mockTranscriptionCreate.mockRejectedValue(apiError)
+      mockTranscriptionsCreate.mockRejectedValue(apiError)
       
       const formData = new FormData()
       formData.append('audio', createMockAudioFile())
@@ -346,7 +366,7 @@ describe('/api/transcribe', () => {
         'Internal server error',
         new Headers()
       )
-      mockTranscriptionCreate.mockRejectedValue(apiError)
+      mockTranscriptionsCreate.mockRejectedValue(apiError)
       
       const formData = new FormData()
       formData.append('audio', createMockAudioFile())
@@ -361,7 +381,7 @@ describe('/api/transcribe', () => {
     })
 
     it('should handle non-OpenAI errors', async () => {
-      mockTranscriptionCreate.mockRejectedValue(
+      mockTranscriptionsCreate.mockRejectedValue(
         new Error('Network error')
       )
       
@@ -389,7 +409,7 @@ describe('/api/transcribe', () => {
         ],
       }
       
-      mockTranscriptionCreate.mockResolvedValue(mockTranscription)
+      mockTranscriptionsCreate.mockResolvedValue(mockTranscription)
       
       const formData = new FormData()
       formData.append('audio', createMockAudioFile())
@@ -413,7 +433,7 @@ describe('/api/transcribe', () => {
         ],
       }
       
-      mockTranscriptionCreate.mockResolvedValue(mockTranscription)
+      mockTranscriptionsCreate.mockResolvedValue(mockTranscription)
       
       const formData = new FormData()
       formData.append('audio', createMockAudioFile())
@@ -432,7 +452,7 @@ describe('/api/transcribe', () => {
         segments: [],
       }
       
-      mockTranscriptionCreate.mockResolvedValue(mockTranscription)
+      mockTranscriptionsCreate.mockResolvedValue(mockTranscription)
       
       const formData = new FormData()
       formData.append('audio', createMockAudioFile())

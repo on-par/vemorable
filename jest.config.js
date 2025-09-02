@@ -15,7 +15,6 @@ const customJestConfig = {
     '^@clerk/nextjs/server$': '<rootDir>/src/__mocks__/@clerk/nextjs/server.js',
   },
   testMatch: [
-    '**/__tests__/**/*.test.[jt]s?(x)',
     '**/?(*.)+(spec|test).[jt]s?(x)'
   ],
   collectCoverageFrom: [
