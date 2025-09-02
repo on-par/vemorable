@@ -180,6 +180,7 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
             controls
             className="w-full"
             src={URL.createObjectURL(audioBlob)}
+            role="application"
           />
           <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
             Recording ready for transcription
