@@ -1,4 +1,4 @@
-import { POST } from '../transcribe/route'
+import { POST } from './transcribe/route'
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { getAuthenticatedUserId, successResponse, errorResponse, handleApiError } from '@/lib/api-utils'

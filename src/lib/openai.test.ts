@@ -1,4 +1,4 @@
-import { cleanupTranscript, generateTitleAndSummary, generateTags, processNoteWithAI } from '../openai'
+import { cleanupTranscript, generateTitleAndSummary, generateTags, processNoteWithAI } from './openai'
 import OpenAI from 'openai'
 
 // Mock the OpenAI module

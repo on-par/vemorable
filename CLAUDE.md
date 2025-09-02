@@ -107,16 +107,20 @@ src/
 ### Testing Hierarchy
 ```
 src/features/voice-notes/
-├── __tests__/
-│   ├── components/
-│   │   ├── VoiceRecorder.test.tsx
-│   │   └── NotesList.test.tsx
-│   ├── hooks/
-│   │   └── useVoiceRecording.test.ts
-│   ├── utils/
-│   │   └── audio.utils.test.ts
-│   └── api/
-│       └── transcribe.test.ts
+├── components/
+│   ├── VoiceRecorder.tsx
+│   ├── VoiceRecorder.test.tsx
+│   ├── NotesList.tsx
+│   └── NotesList.test.tsx
+├── hooks/
+│   ├── useVoiceRecording.ts
+│   └── useVoiceRecording.test.ts
+├── utils/
+│   ├── audio.utils.ts
+│   └── audio.utils.test.ts
+└── api/
+    ├── transcribe.ts
+    └── transcribe.test.ts
 ```
 
 ### Test Categories

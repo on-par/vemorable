@@ -1,7 +1,7 @@
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import NoteCard from '../NoteCard'
+import NoteCard from './NoteCard'
 
 // Mock fetch for delete operations
 global.fetch = jest.fn()
