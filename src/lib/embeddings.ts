@@ -1,4 +1,4 @@
-import { openai } from './openai'
+import OpenAI from 'openai'
 
 export interface EmbeddingResult {
   embedding: number[]
@@ -20,6 +20,8 @@ export async function generateEmbedding(text: string): Promise<EmbeddingResult> 
   }
 
   try {
+    // Create fresh instance to allow for mocking in tests
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
     const response = await openai.embeddings.create({
       model: 'text-embedding-ada-002',
       input: text.trim(),
@@ -62,6 +64,8 @@ export async function generateEmbeddings(texts: string[]): Promise<EmbeddingResu
   }
 
   try {
+    // Create fresh instance to allow for mocking in tests
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
     const response = await openai.embeddings.create({
       model: 'text-embedding-ada-002',
       input: validTexts.map(text => text.trim()),

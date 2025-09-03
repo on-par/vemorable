@@ -1,6 +1,7 @@
 import OpenAI from 'openai'
 
-const openai = new OpenAI({
+// Create openai instance
+export const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
@@ -30,7 +31,9 @@ export async function cleanupTranscript(rawTranscript: string): Promise<Transcri
   }
 
   try {
-    const completion = await openai.chat.completions.create({
+    // Create fresh instance to allow for mocking in tests
+    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+    const completion = await client.chat.completions.create({
       model: 'gpt-3.5-turbo',
       messages: [
         {
@@ -70,7 +73,9 @@ export async function generateTitleAndSummary(content: string): Promise<TitleSum
   }
 
   try {
-    const completion = await openai.chat.completions.create({
+    // Create fresh instance to allow for mocking in tests
+    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+    const completion = await client.chat.completions.create({
       model: 'gpt-3.5-turbo',
       messages: [
         {
@@ -126,7 +131,9 @@ export async function generateTags(content: string): Promise<TagsResult> {
   }
 
   try {
-    const completion = await openai.chat.completions.create({
+    // Create fresh instance to allow for mocking in tests
+    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+    const completion = await client.chat.completions.create({
       model: 'gpt-3.5-turbo',
       messages: [
         {
@@ -208,4 +215,4 @@ export async function processNoteWithAI(transcript: string): Promise<ProcessedNo
   }
 }
 
-export { openai }
+// openai is already exported above

@@ -1,4 +1,5 @@
-import { cleanupTranscript, generateTitleAndSummary, generateTags, processNoteWithAI } from './openai'
+import { cleanupTranscript, generateTitleAndSummary, generateTags, processNoteWithAI, openai } from './openai'
+import { generateEmbedding } from './embeddings'
 import OpenAI from 'openai'
 
 // Mock the OpenAI module
@@ -6,6 +7,7 @@ jest.mock('openai')
 
 describe('OpenAI Utility Functions', () => {
   let mockCreate: jest.Mock
+  let mockEmbeddingsCreate: jest.Mock
   
   beforeEach(() => {
     // Reset all mocks before each test
@@ -13,11 +15,15 @@ describe('OpenAI Utility Functions', () => {
     
     // Setup the mock for OpenAI
     mockCreate = jest.fn()
+    mockEmbeddingsCreate = jest.fn()
     const mockOpenAI = {
       chat: {
         completions: {
           create: mockCreate
         }
+      },
+      embeddings: {
+        create: mockEmbeddingsCreate
       }
     }
     ;(OpenAI as jest.MockedClass<typeof OpenAI>).mockImplementation(() => mockOpenAI as any)
@@ -329,6 +335,42 @@ describe('OpenAI Utility Functions', () => {
         .mockRejectedValueOnce(new Error('API Error'))
 
       await expect(processNoteWithAI(transcript)).rejects.toThrow('Failed to generate tags')
+    })
+  })
+
+  describe('generateEmbedding', () => {
+
+    it('should validate input', async () => {
+      await expect(generateEmbedding('')).rejects.toThrow('Text is empty or invalid')
+      await expect(generateEmbedding('  ')).rejects.toThrow('Text is empty or invalid')
+    })
+
+    it('should handle API errors correctly', async () => {
+      mockEmbeddingsCreate.mockRejectedValue(new Error('API Error'))
+      
+      await expect(generateEmbedding('Some text')).rejects.toThrow('Failed to generate embedding')
+    })
+
+    it('should successfully generate embedding', async () => {
+      const mockResponse = {
+        data: [{
+          embedding: [0.1, 0.2, 0.3]
+        }],
+        model: 'text-embedding-ada-002',
+        usage: {
+          prompt_tokens: 4,
+          total_tokens: 4
+        }
+      }
+      
+      mockEmbeddingsCreate.mockResolvedValue(mockResponse)
+
+      const result = await generateEmbedding('test text')
+      
+      expect(result.embedding).toEqual([0.1, 0.2, 0.3])
+      expect(result.model).toBe('text-embedding-ada-002')
+      expect(result.usage.prompt_tokens).toBe(4)
+      expect(result.usage.total_tokens).toBe(4)
     })
   })
 })

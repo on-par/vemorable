@@ -50,10 +50,11 @@ export default function NoteCard({
 
       if (response.ok) {
         onDelete(note.id);
-        setShowDeleteConfirm(false);
       }
+      setShowDeleteConfirm(false);
     } catch (error) {
       console.error('Failed to delete note:', error);
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -121,7 +122,6 @@ export default function NoteCard({
                   onClick={(e) => {
                     e.stopPropagation();
                     setShowDeleteConfirm(true);
-                    setShowActions(false);
                   }}
                   className="w-full px-4 py-2 text-left text-sm hover:bg-red-50 text-red-600 flex items-center gap-2"
                 >
@@ -186,7 +186,21 @@ export default function NoteCard({
               <p className="text-sm text-gray-800 mb-3">Delete this note?</p>
               <div className="flex gap-2 justify-center">
                 <button
-                  onClick={handleDelete}
+                  onClick={async () => {
+                    try {
+                      const response = await fetch(`/api/notes/${note.id}`, {
+                        method: 'DELETE',
+                      });
+
+                      if (response.ok) {
+                        onDelete(note.id);
+                      }
+                      setShowDeleteConfirm(false);
+                    } catch (error) {
+                      console.error('Failed to delete note:', error);
+                      setShowDeleteConfirm(false);
+                    }
+                  }}
                   className="px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700"
                 >
                   Delete
