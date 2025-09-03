@@ -45,7 +45,7 @@ Runs on: Pull requests to `main` branch
 - RLS policy warnings
 - Destructive operation warnings
 
-### 2. Main Branch Checks & Migrations (`main-branch.yml`)
+### 2. Database Migrations & Verification (`migrate.yml`)
 Runs on: 
 - Push to `main` branch (after merge)
 - Manual workflow dispatch
@@ -57,19 +57,14 @@ Runs on:
    - Unit test execution
    - Build verification
 
-2. **Database Migrations**
+2. **Database Migrations** (Primary focus)
    - Links to Supabase project
    - Checks current migration status
    - Applies pending migrations
    - Verifies migration success
    - Can be skipped via workflow dispatch
 
-3. **End-to-End Tests** (if configured)
-   - Waits for Vercel deployment
-   - Runs Playwright tests against production URL
-   - Uploads test results
-
-4. **Post-deployment Verification**
+3. **Post-deployment Verification**
    - Health checks on deployed app
    - Critical route verification
    - API endpoint testing
@@ -182,10 +177,10 @@ npm run build
 4. Wait for PR checks to pass
 5. Merge to main → Auto-deploys
 
-### Manual Deployment
+### Manual Migration Run
 ```bash
 # Via GitHub Actions
-# Go to Actions → Deploy to Production → Run workflow
+# Go to Actions → Database Migrations & Verification → Run workflow
 
 # Can skip migrations if needed
 # Check "Skip database migrations" option
