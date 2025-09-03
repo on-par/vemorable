@@ -45,16 +45,17 @@ Runs on: Pull requests to `main` branch
 - RLS policy warnings
 - Destructive operation warnings
 
-### 2. Production Deployment (`deploy.yml`)
+### 2. Main Branch Checks & Migrations (`main-branch.yml`)
 Runs on: 
-- Push to `main` branch
+- Push to `main` branch (after merge)
 - Manual workflow dispatch
 
 **Stages:**
-1. **Pre-deployment Verification**
-   - All PR checks
-   - Full test suite
-   - Production build
+1. **Code Quality Verification**
+   - TypeScript type checking
+   - ESLint linting
+   - Unit test execution
+   - Build verification
 
 2. **Database Migrations**
    - Links to Supabase project
@@ -63,15 +64,17 @@ Runs on:
    - Verifies migration success
    - Can be skipped via workflow dispatch
 
-3. **Vercel Deployment**
-   - Builds production artifacts
-   - Deploys to Vercel
-   - Returns deployment URL
+3. **End-to-End Tests** (if configured)
+   - Waits for Vercel deployment
+   - Runs Playwright tests against production URL
+   - Uploads test results
 
-4. **Smoke Tests**
+4. **Post-deployment Verification**
    - Health checks on deployed app
    - Critical route verification
    - API endpoint testing
+
+**Note:** Vercel automatically deploys on push to main - no manual deployment needed!
 
 ## Migration Management
 

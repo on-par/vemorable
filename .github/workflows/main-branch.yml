@@ -1,4 +1,4 @@
-name: Deploy to Production
+name: Main Branch Checks & Migrations
 
 on:
   push:
@@ -13,12 +13,10 @@ on:
 
 env:
   NODE_VERSION: '20'
-  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
 jobs:
   verify:
-    name: Pre-deployment Verification
+    name: Verify Code Quality
     runs-on: ubuntu-latest
     
     steps:
@@ -42,7 +40,7 @@ jobs:
       - name: Lint code
         run: npm run lint
       
-      - name: Run tests
+      - name: Run unit tests
         env:
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
@@ -109,14 +107,11 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
-  deploy:
-    name: Deploy to Vercel
+  e2e-tests:
+    name: End-to-End Tests
     runs-on: ubuntu-latest
     needs: [verify, migrate]
     if: always() && needs.verify.result == 'success' && (needs.migrate.result == 'success' || needs.migrate.result == 'skipped')
-    
-    outputs:
-      deployment-url: ${{ steps.deploy.outputs.deployment-url }}
     
     steps:
       - name: Checkout code
@@ -128,51 +123,66 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
       
-      - name: Install Vercel CLI
-        run: npm install --global vercel@latest
+      - name: Install dependencies
+        run: npm ci
       
-      - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Install Playwright
+        run: npx playwright install --with-deps chromium
       
-      - name: Build Project Artifacts
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-      
-      - name: Deploy to Vercel
-        id: deploy
+      - name: Wait for Vercel deployment
+        id: wait-for-vercel
         run: |
-          deployment_url=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
-          echo "deployment-url=$deployment_url" >> $GITHUB_OUTPUT
-          echo "Deployed to: $deployment_url"
+          echo "Waiting for Vercel deployment to complete..."
+          sleep 60
+          # In a real scenario, you might want to poll Vercel API or use deployment_status event
       
-      - name: Comment deployment URL on commit
-        uses: actions/github-script@v7
+      - name: Get deployment URL
+        id: get-url
+        run: |
+          # For production deployments, use the production URL
+          echo "deployment-url=https://vemorable.vercel.app" >> $GITHUB_OUTPUT
+      
+      - name: Run E2E tests
+        env:
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          DEPLOYMENT_URL: ${{ steps.get-url.outputs.deployment-url }}
+        run: |
+          if [ -f "playwright.config.ts" ]; then
+            echo "Running Playwright E2E tests against $DEPLOYMENT_URL"
+            npx playwright test
+          else
+            echo "No Playwright tests found, skipping E2E tests"
+          fi
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const deployment_url = '${{ steps.deploy.outputs.deployment-url }}';
-            await github.rest.repos.createCommitComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              commit_sha: context.sha,
-              body: `✅ Deployed to production: ${deployment_url}`
-            });
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
 
   smoke-tests:
-    name: Post-deployment Smoke Tests
+    name: Post-deployment Verification
     runs-on: ubuntu-latest
-    needs: deploy
-    if: needs.deploy.result == 'success'
+    needs: [verify, migrate]
+    if: always() && needs.verify.result == 'success'
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Wait for deployment to be ready
-        run: sleep 30
+      - name: Wait for deployment
+        run: |
+          echo "Waiting for Vercel deployment to be ready..."
+          sleep 45
       
       - name: Health check
         run: |
-          deployment_url="${{ needs.deploy.outputs.deployment-url }}"
+          deployment_url="https://vemorable.vercel.app"
           echo "Testing deployment at: $deployment_url"
           
           # Test homepage
@@ -190,7 +200,7 @@ jobs:
       
       - name: Check critical pages
         run: |
-          deployment_url="${{ needs.deploy.outputs.deployment-url }}"
+          deployment_url="https://vemorable.vercel.app"
           
           # List of critical routes to check
           routes=("/sign-in" "/sign-up" "/dashboard")
@@ -204,15 +214,15 @@ jobs:
             fi
           done
       
-      - name: Notify on failure
-        if: failure()
+      - name: Create deployment comment
+        if: success()
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            await github.rest.issues.createComment({
+            await github.rest.repos.createCommitComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: '❌ Post-deployment smoke tests failed. Please check the deployment.'
+              commit_sha: context.sha,
+              body: `✅ Production deployment verified successfully at https://vemorable.vercel.app`
             });
