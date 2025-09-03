@@ -6,7 +6,7 @@ import { ApiError } from '@/lib/supabase/types'
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
-    const userId = await getAuthenticatedUserId(request)
+    const userId = await getAuthenticatedUserId()
     const notesService = await createNotesService()
     
     const searchParams = request.nextUrl.searchParams
@@ -85,7 +85,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    const userId = await getAuthenticatedUserId(request)
+    const userId = await getAuthenticatedUserId()
     const notesService = await createNotesService()
     
     const body = await request.json()

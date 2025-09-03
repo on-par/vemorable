@@ -90,9 +90,9 @@ describe('Modern API Route Architecture', () => {
       
       const handler = factory
         .withAuth()
-        .createHandler(async (req: NextRequest, context: { userId: string }) => {
-          expect(context.userId).toBe('test-user-id')
-          return { success: true, userId: context.userId }
+        .createHandler(async (_req: NextRequest, context) => {
+          expect(context?.userId).toBe('test-user-id')
+          return { success: true, data: { userId: context?.userId } }
         })
 
       const mockRequest = new NextRequest('http://localhost:3000/api/test')
@@ -101,7 +101,7 @@ describe('Modern API Route Architecture', () => {
       expect(response).toBeInstanceOf(NextResponse)
       const data = await response.json()
       expect(data.success).toBe(true)
-      expect(data.userId).toBe('test-user-id')
+      expect(data.data.userId).toBe('test-user-id')
     })
   })
 
@@ -268,7 +268,7 @@ describe('Modern API Route Architecture', () => {
           })
         })
         
-        const response = await PUT(mockRequest, { params: { id: 'note-1' } })
+        const response = await PUT(mockRequest, { params: Promise.resolve({ id: 'note-1' }) })
         const data = await response.json()
 
         expect(mockNotesService.updateNote).toHaveBeenCalledWith('note-1', 'test-user-id', {
@@ -289,7 +289,7 @@ describe('Modern API Route Architecture', () => {
           method: 'DELETE'
         })
         
-        const response = await DELETE(mockRequest, { params: { id: 'note-1' } })
+        const response = await DELETE(mockRequest, { params: Promise.resolve({ id: 'note-1' }) })
         const data = await response.json()
 
         expect(mockNotesService.deleteNote).toHaveBeenCalledWith('note-1', 'test-user-id', false)
@@ -304,7 +304,7 @@ describe('Modern API Route Architecture', () => {
           method: 'DELETE'
         })
         
-        await DELETE(mockRequest, { params: { id: 'note-1' } })
+        await DELETE(mockRequest, { params: Promise.resolve({ id: 'note-1' }) })
 
         expect(mockNotesService.deleteNote).toHaveBeenCalledWith('note-1', 'test-user-id', true)
       })
@@ -414,7 +414,7 @@ describe('Modern API Route Architecture', () => {
           })
         })
         
-        const response = await POST(mockRequest, { params: { id: 'session-1' } })
+        const response = await POST(mockRequest, { params: Promise.resolve({ id: 'session-1' }) })
         const data = await response.json()
 
         expect(mockChatService.addMessage).toHaveBeenCalledWith('session-1', 'user', 'Hello!')
@@ -432,7 +432,7 @@ describe('Modern API Route Architecture', () => {
           })
         })
         
-        const response = await POST(mockRequest, { params: { id: 'session-1' } })
+        const response = await POST(mockRequest, { params: Promise.resolve({ id: 'session-1' }) })
         const data = await response.json()
 
         expect(data.success).toBe(false)

@@ -1,4 +1,3 @@
-import { NextRequest } from 'next/server'
 import { createServerClient } from '../supabase/server'
 import { ApiError } from '../supabase/types'
 
@@ -6,7 +5,7 @@ import { ApiError } from '../supabase/types'
  * Get the authenticated user ID from the request
  * Throws ApiError if user is not authenticated
  */
-export async function getAuthenticatedUserId(_req: NextRequest): Promise<string> {
+export async function getAuthenticatedUserId(): Promise<string> {
   try {
     const supabase = await createServerClient()
     
@@ -34,9 +33,9 @@ export async function getAuthenticatedUserId(_req: NextRequest): Promise<string>
  * Get the authenticated user from the request
  * Returns null if user is not authenticated (non-throwing version)
  */
-export async function getOptionalUserId(req: NextRequest): Promise<string | null> {
+export async function getOptionalUserId(): Promise<string | null> {
   try {
-    return await getAuthenticatedUserId(req)
+    return await getAuthenticatedUserId()
   } catch {
     return null
   }

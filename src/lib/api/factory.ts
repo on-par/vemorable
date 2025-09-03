@@ -34,7 +34,7 @@ export class ApiRouteFactory {
     this.options.requireAuth = requireAuth
     this.middlewares.push((handler) => async (req, context = {}) => {
       try {
-        const userId = await getAuthenticatedUserId(req)
+        const userId = await getAuthenticatedUserId()
         return handler(req, { ...context, userId })
       } catch {
         throw new ApiError('Unauthorized', 401, 'UNAUTHORIZED')

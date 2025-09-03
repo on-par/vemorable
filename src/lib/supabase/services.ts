@@ -54,13 +54,12 @@ export abstract class BaseService {
    */
   protected async executeQuery<T>(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    queryPromise: any,
-    context: string
+    queryPromise: any
   ): Promise<T> {
     const { data, error } = await queryPromise
     
     if (error) {
-      this.handleError(error, context)
+      this.handleError(error, 'Database operation')
     }
 
     return data as T
@@ -71,8 +70,7 @@ export abstract class BaseService {
    */
   protected async executeQueryWithCount<T>(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    queryPromise: any,
-    _context: string
+    queryPromise: any
   ): Promise<DatabaseResult<T>> {
     const { data, error, count } = await queryPromise
     
@@ -124,8 +122,7 @@ export class NotesService extends BaseService {
           .from('notes')
           .insert(noteWithEmbedding)
           .select()
-          .single(),
-        context
+          .single()
       )
     } catch (error) {
       this.handleError(error, context)
@@ -174,7 +171,7 @@ export class NotesService extends BaseService {
       // Apply pagination
       query = query.range(offset, offset + limit - 1)
 
-      return await this.executeQueryWithCount(query, context)
+      return await this.executeQueryWithCount(query)
     } catch (error) {
       this.handleError(error, context)
     }
@@ -194,8 +191,7 @@ export class NotesService extends BaseService {
           .eq('id', noteId)
           .eq('user_id', userId)
           .is('deleted_at', null)
-          .single(),
-        context
+          .single()
       )
 
       return data as Note | null
@@ -251,8 +247,7 @@ export class NotesService extends BaseService {
           .eq('user_id', userId)
           .is('deleted_at', null)
           .select()
-          .single(),
-        context
+          .single()
       )
     } catch (error) {
       this.handleError(error, context)
@@ -276,8 +271,7 @@ export class NotesService extends BaseService {
             .from('notes')
             .delete()
             .eq('id', noteId)
-            .eq('user_id', userId),
-          context
+            .eq('user_id', userId)
         )
       } else {
         await this.executeQuery(
@@ -287,8 +281,7 @@ export class NotesService extends BaseService {
             .eq('id', noteId)
             .eq('user_id', userId)
             .select()
-            .single(),
-          context
+            .single()
         )
       }
     } catch (error) {
@@ -321,7 +314,7 @@ export class NotesService extends BaseService {
 
       query = query.range(offset, offset + limit - 1)
 
-      return await this.executeQueryWithCount(query, context)
+      return await this.executeQueryWithCount(query)
     } catch (error) {
       this.handleError(error, context)
     }
@@ -340,8 +333,7 @@ export class NotesService extends BaseService {
           .select('tags')
           .eq('user_id', userId)
           .is('deleted_at', null)
-          .not('tags', 'is', null),
-        context
+          .not('tags', 'is', null)
       )
 
       if (!data) return []
@@ -380,8 +372,7 @@ export class SearchService extends BaseService {
           match_threshold: matchThreshold,
           match_count: matchCount,
           user_id_filter: userId,
-        }),
-        context
+        })
       )
     } catch (error) {
       this.handleError(error, context)
@@ -411,8 +402,7 @@ export class SearchService extends BaseService {
           match_threshold: matchThreshold,
           match_count: matchCount,
           user_id_filter: userId,
-        }),
-        context
+        })
       )
     } catch (error) {
       this.handleError(error, context)
@@ -445,7 +435,7 @@ export class SearchService extends BaseService {
         .order('created_at', { ascending: false })
         .range(offset, offset + limit - 1)
 
-      return await this.executeQueryWithCount(dbQuery, context)
+      return await this.executeQueryWithCount(dbQuery)
     } catch (error) {
       this.handleError(error, context)
     }
@@ -475,8 +465,7 @@ export class ChatService extends BaseService {
           .from('chat_sessions')
           .insert(sessionData)
           .select()
-          .single(),
-        context
+          .single()
       )
     } catch (error) {
       this.handleError(error, context)
@@ -500,8 +489,7 @@ export class ChatService extends BaseService {
           .select('*', { count: 'exact' })
           .eq('user_id', userId)
           .order('updated_at', { ascending: false })
-          .range(offset, offset + limit - 1),
-        context
+          .range(offset, offset + limit - 1)
       )
     } catch (error) {
       this.handleError(error, context)
@@ -536,8 +524,7 @@ export class ChatService extends BaseService {
         this.db
           .from('chat_sessions')
           .update({ updated_at: new Date().toISOString() })
-          .eq('id', sessionId),
-        'ChatService.updateSessionTimestamp'
+          .eq('id', sessionId)
       )
 
       return await this.executeQuery(
@@ -545,8 +532,7 @@ export class ChatService extends BaseService {
           .from('chat_messages')
           .insert(messageData)
           .select()
-          .single(),
-        context
+          .single()
       )
     } catch (error) {
       this.handleError(error, context)
@@ -570,8 +556,7 @@ export class ChatService extends BaseService {
           .select('*')
           .eq('session_id', sessionId)
           .order('created_at', { ascending: true })
-          .range(offset, offset + limit - 1),
-        context
+          .range(offset, offset + limit - 1)
       )
 
       return (data || []) as ChatMessage[]
@@ -597,8 +582,7 @@ export class ChatService extends BaseService {
           .eq('id', sessionId)
           .eq('user_id', userId)
           .select()
-          .single(),
-        context
+          .single()
       )
     } catch (error) {
       this.handleError(error, context)
@@ -618,8 +602,7 @@ export class ChatService extends BaseService {
           .from('chat_sessions')
           .delete()
           .eq('id', sessionId)
-          .eq('user_id', userId),
-        context
+          .eq('user_id', userId)
       )
     } catch (error) {
       this.handleError(error, context)

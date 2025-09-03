@@ -45,7 +45,16 @@ describe('Modern Supabase Type Helpers', () => {
         user_id: 'test-user',
         title: 'Test Note',
         processed_content: 'Test content',
-        created_at: '2024-01-01T00:00:00.000Z'
+        raw_transcript: null,
+        summary: null,
+        tags: null,
+        embedding: null,
+        file_url: null,
+        file_name: null,
+        file_type: null,
+        file_size: null,
+        created_at: '2024-01-01T00:00:00.000Z',
+        updated_at: '2024-01-01T00:00:00.000Z'
       }
 
       const noteInsert: NoteInsert = {
@@ -102,7 +111,8 @@ describe('Modern Supabase Type Helpers', () => {
       // This test ensures our type helpers work with the actual generated types
       type DatabaseType = Database
 
-      expect(typeof DatabaseType).toBe('undefined') // Types don't exist at runtime
+      // Types don't exist at runtime, so we can't check them directly
+      expect(true).toBe(true) // Types don't exist at runtime
       
       // But should compile without errors when using the types
       const query = (db: any) => {
@@ -121,7 +131,8 @@ describe('Modern Supabase Type Helpers', () => {
       // This should cause TypeScript errors (invalid table):
       // type InvalidType = Tables<'invalid_table'>
       
-      expect(typeof ValidType).toBe('undefined')
+      // Types don't exist at runtime, so we can't check them directly
+      expect(true).toBe(true)
     })
 
     it('should provide proper autocompletion for database operations', () => {
@@ -143,7 +154,16 @@ describe('Modern Supabase Type Helpers', () => {
         user_id: 'user',
         title: 'title',
         processed_content: 'content',
-        created_at: '2024-01-01'
+        raw_transcript: null,
+        summary: null,
+        tags: null,
+        embedding: null,
+        file_url: null,
+        file_name: null,
+        file_type: null,
+        file_size: null,
+        created_at: '2024-01-01',
+        updated_at: '2024-01-01'
       }
 
       expect(processNote(mockNote)).toEqual({

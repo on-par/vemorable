@@ -77,7 +77,11 @@ describe('Modern Database Services', () => {
 
         const mockNote: Note = {
           id: 'note-id',
-          ...noteData,
+          user_id: noteData.user_id,
+          title: noteData.title,
+          processed_content: noteData.processed_content,
+          summary: noteData.summary ?? null,
+          tags: noteData.tags ?? null,
           raw_transcript: null,
           embedding: '[0.1,0.2,0.3]', // Mock embedding
           file_url: null,
@@ -132,7 +136,11 @@ describe('Modern Database Services', () => {
 
         const mockNote: Note = {
           id: 'note-id',
-          ...noteData,
+          user_id: noteData.user_id,
+          title: noteData.title,
+          processed_content: noteData.processed_content,
+          summary: noteData.summary ?? null,
+          tags: noteData.tags ?? null,
           raw_transcript: null,
           embedding: '[0.1,0.2,0.3]', // Mock embedding vector
           file_url: null,
@@ -323,8 +331,8 @@ describe('Modern Database Services', () => {
         mockSupabaseClient.rpc.mockResolvedValue({ data: mockResults, error: null })
 
         const result = await searchService.semanticSearch('test-user', queryEmbedding, {
-          threshold: 0.7,
-          limit: 10
+          matchThreshold: 0.7,
+          matchCount: 10
         })
 
         expect(mockSupabaseClient.rpc).toHaveBeenCalledWith('search_notes', {
