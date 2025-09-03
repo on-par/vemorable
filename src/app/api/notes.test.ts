@@ -1,4 +1,4 @@
-import { GET, POST } from '../notes/route'
+import { GET, POST } from './notes/route'
 import { NextRequest } from 'next/server'
 import { createServerClientInstance } from '@/lib/supabase'
 import { getAuthenticatedUserId } from '@/lib/api-utils'

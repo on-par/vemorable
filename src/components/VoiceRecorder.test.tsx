@@ -1,7 +1,7 @@
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { VoiceRecorder } from '../VoiceRecorder'
+import { VoiceRecorder } from './VoiceRecorder'
 import { useVoiceRecording } from '@/hooks/useVoiceRecording'
 
 // Mock the useVoiceRecording hook

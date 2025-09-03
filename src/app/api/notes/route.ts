@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createServerClientInstance } from '@/lib/supabase'
 import { createNoteSchema } from '@/lib/validations'
 import {
@@ -9,7 +9,7 @@ import {
 import { Database } from '@/types/database'
 import { generateNoteEmbedding, formatEmbeddingForPgVector } from '@/lib/embeddings'
 
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const userId = await getAuthenticatedUserId()
     const supabase = await createServerClientInstance()
@@ -47,20 +47,29 @@ export async function GET(request: NextRequest) {
       throw error
     }
 
-    return successResponse({
-      notes: notes || [],
-      pagination: {
-        limit,
-        offset,
-        total: count || 0,
-      },
+    return NextResponse.json({
+      success: true,
+      data: {
+        notes: notes || [],
+        pagination: {
+          limit,
+          offset,
+          total: count || 0,
+        },
+      }
     })
   } catch (error) {
-    return handleApiError(error)
+    return NextResponse.json({
+      success: false,
+      error: {
+        message: error instanceof Error ? error.message : 'An unexpected error occurred',
+        code: 'INTERNAL_ERROR'
+      }
+    }, { status: 500 })
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const userId = await getAuthenticatedUserId()
     const supabase = await createServerClientInstance()
@@ -100,8 +109,21 @@ export async function POST(request: NextRequest) {
       throw error
     }
 
-    return successResponse(note, 201)
+    return NextResponse.json({
+      success: true,
+      data: note
+    }, { status: 201 })
   } catch (error) {
-    return handleApiError(error)
+    const isValidationError = error && typeof error === 'object' && 'name' in error && error.name === 'ZodError'
+    
+    return NextResponse.json({
+      success: false,
+      error: {
+        message: error instanceof Error ? error.message : 'An unexpected error occurred',
+        code: isValidationError ? 'VALIDATION_ERROR' : 'INTERNAL_ERROR'
+      }
+    }, { 
+      status: isValidationError ? 400 : 500 
+    })
   }
 }

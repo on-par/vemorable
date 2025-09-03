@@ -42,7 +42,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const validateFile = (file: File): string | null => {
+  const validateFile = useCallback((file: File): string | null => {
     if (!acceptedTypes.includes(file.type)) {
       return `File type ${file.type} is not supported`;
     }
@@ -50,7 +50,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       return `File size exceeds ${maxFileSize / 1024 / 1024}MB limit`;
     }
     return null;
-  };
+  }, [acceptedTypes, maxFileSize]);
 
   const handleFiles = useCallback((files: FileList | File[]) => {
     const fileArray = Array.from(files);
@@ -80,7 +80,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       setSelectedFiles(validFiles);
       onFileSelect?.(validFiles);
     }
-  }, [acceptedTypes, maxFileSize, maxFiles, onError, onFileSelect]);
+  }, [maxFiles, onError, onFileSelect, validateFile]);
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();

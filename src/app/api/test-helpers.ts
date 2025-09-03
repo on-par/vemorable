@@ -4,17 +4,17 @@ export const mockNextRequest = () => {
   if (typeof Request === 'undefined') {
     global.Request = class Request {
       constructor(public url: string, public init?: RequestInit) {}
-    } as any
+    } as typeof Request
   }
 
   // Mock the global Response if it doesn't exist (Node.js environment)
   if (typeof Response === 'undefined') {
     global.Response = class Response {
-      constructor(public body?: any, public init?: ResponseInit) {}
+      constructor(public body?: unknown, public init?: ResponseInit) {}
       json() {
         return Promise.resolve(this.body)
       }
-    } as any
+    } as typeof Response
   }
 
   // Mock Headers if it doesn't exist
@@ -41,6 +41,6 @@ export const mockNextRequest = () => {
       forEach(callback: (value: string, key: string) => void) {
         Object.entries(this.headers).forEach(([key, value]) => callback(value, key))
       }
-    } as any
+    } as typeof Headers
   }
 }

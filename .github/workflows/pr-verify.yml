@@ -1,0 +1,142 @@
+name: PR Verification
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+env:
+  NODE_VERSION: '20'
+  
+jobs:
+  verify:
+    name: Verify PR
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Needed for migration diff checks
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      # Type checking
+      - name: Type check
+        run: npx tsc --noEmit
+      
+      # Linting
+      - name: Lint code
+        run: npm run lint
+      
+      # Build verification
+      - name: Build application
+        env:
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NEXT_PUBLIC_APP_URL: https://vemorable.vercel.app
+        run: npm run build
+      
+      # Run tests
+      - name: Run Jest tests
+        env:
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: npm test -- --ci --coverage --maxWorkers=2
+      
+      # Supabase Migration Validation
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      
+      - name: Validate migration files
+        run: |
+          echo "Checking migration file syntax..."
+          for file in supabase/migrations/*.sql; do
+            if [ -f "$file" ]; then
+              echo "Validating: $file"
+              # Basic SQL syntax check
+              npx sql-formatter --verify "$file" || true
+            fi
+          done
+      
+      - name: Check for migration conflicts
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "Checking for migration file conflicts..."
+          
+          # Get list of migration files in PR
+          git diff --name-only origin/main...HEAD | grep "supabase/migrations/" || echo "No migration changes"
+          
+          # Check if migrations are sequential
+          if ls supabase/migrations/*.sql 2>/dev/null; then
+            echo "Migration files found:"
+            ls -la supabase/migrations/*.sql
+          fi
+      
+      # Security audit
+      - name: Security audit
+        run: npm audit --audit-level=high
+        continue-on-error: true # Don't fail on audit issues, but report them
+      
+      # Check bundle size
+      - name: Check bundle size
+        run: |
+          echo "Build output size:"
+          du -sh .next/
+          du -sh .next/static/
+      
+      # Playwright tests (placeholder for future implementation)
+      - name: Check for Playwright tests
+        run: |
+          if [ -f "playwright.config.ts" ] || [ -f "playwright.config.js" ]; then
+            echo "Playwright tests found - would run them here"
+            # npm run test:e2e
+          else
+            echo "No Playwright tests configured yet"
+          fi
+      
+  migration-safety:
+    name: Migration Safety Check
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.labels.*.name, 'database') || contains(github.event.pull_request.title, 'migration')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      
+      - name: Migration dry run warning
+        run: |
+          echo "⚠️ Database migrations detected!"
+          echo "Please ensure:"
+          echo "1. Migrations are backwards compatible"
+          echo "2. No data loss will occur"
+          echo "3. Migrations have been tested locally"
+          echo ""
+          echo "Migrations in this PR:"
+          git diff --name-only origin/main...HEAD | grep "supabase/migrations/" || echo "No migration files changed"

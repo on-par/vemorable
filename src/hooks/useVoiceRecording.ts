@@ -73,6 +73,25 @@ export const useVoiceRecording = (
     }
   }, []);
 
+  // Internal function to stop recording (not wrapped in useCallback to avoid circular dependencies)
+  const stopRecordingInternal = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+    }
+
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+
+    setIsRecording(false);
+  };
+
   // Start recording
   const startRecording = useCallback(async () => {
     try {
@@ -135,7 +154,7 @@ export const useVoiceRecording = (
       mediaRecorder.onerror = (event: Event) => {
         const errorEvent = event as ErrorEvent;
         setError(`Recording error: ${errorEvent.error?.message || 'Unknown error'}`);
-        stopRecording();
+        stopRecordingInternal();
       };
 
       // Start recording
@@ -176,39 +195,25 @@ export const useVoiceRecording = (
 
   // Stop recording
   const stopRecording = useCallback(() => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      mediaRecorderRef.current.stop();
-    }
-
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
-    }
-
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-
-    setIsRecording(false);
+    stopRecordingInternal();
   }, []);
 
   // Reset recording
   const resetRecording = useCallback(() => {
-    stopRecording();
+    stopRecordingInternal();
     setAudioBlob(null);
     setRecordingTime(0);
     setError(null);
-  }, [stopRecording]);
+  }, []);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (isRecording) {
-        stopRecording();
+        stopRecordingInternal();
       }
     };
-  }, [isRecording, stopRecording]);
+  }, [isRecording]);
 
   return {
     isRecording,
