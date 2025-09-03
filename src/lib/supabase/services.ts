@@ -28,12 +28,21 @@ export abstract class BaseService {
   }
 
   /**
+   * Get the Supabase client with proper typing
+   * This is a workaround for TypeScript inference issues with Supabase
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  protected get db(): any {
+    return this.client
+  }
+
+  /**
    * Handle database errors consistently
    */
-  protected handleError(error: any, context: string): never {
+  protected handleError(error: unknown, context: string): never {
     console.error(`${context} error:`, error)
     throw new ApiError(
-      error.message || 'Database operation failed',
+      error instanceof Error ? error.message : 'Database operation failed',
       500,
       'DATABASE_ERROR',
       { context, originalError: error }
@@ -44,7 +53,8 @@ export abstract class BaseService {
    * Execute query with error handling
    */
   protected async executeQuery<T>(
-    queryPromise: Promise<{ data: T | null; error: any }>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    queryPromise: any,
     context: string
   ): Promise<T> {
     const { data, error } = await queryPromise
@@ -60,8 +70,9 @@ export abstract class BaseService {
    * Execute query with count
    */
   protected async executeQueryWithCount<T>(
-    queryPromise: Promise<{ data: T | null; error: any; count?: number | null }>,
-    context: string
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    queryPromise: any,
+    _context: string
   ): Promise<DatabaseResult<T>> {
     const { data, error, count } = await queryPromise
     
@@ -109,7 +120,7 @@ export class NotesService extends BaseService {
       }
 
       return await this.executeQuery(
-        this.client
+        this.db
           .from('notes')
           .insert(noteWithEmbedding)
           .select()
@@ -139,7 +150,7 @@ export class NotesService extends BaseService {
     } = params
 
     try {
-      let query = this.client
+      let query = this.db
         .from('notes')
         .select('*', { count: 'exact' })
         .eq('user_id', userId)
@@ -177,7 +188,7 @@ export class NotesService extends BaseService {
 
     try {
       const { data } = await this.executeQueryWithCount(
-        this.client
+        this.db
           .from('notes')
           .select('*')
           .eq('id', noteId)
@@ -187,10 +198,10 @@ export class NotesService extends BaseService {
         context
       )
 
-      return data
+      return data as Note | null
     } catch (error) {
       // Return null for not found instead of throwing
-      if (error.message?.includes('No rows returned')) {
+      if (error instanceof Error && error.message?.includes('No rows returned')) {
         return null
       }
       this.handleError(error, context)
@@ -233,7 +244,7 @@ export class NotesService extends BaseService {
       }
 
       return await this.executeQuery(
-        this.client
+        this.db
           .from('notes')
           .update(dataWithTimestamp)
           .eq('id', noteId)
@@ -261,7 +272,7 @@ export class NotesService extends BaseService {
     try {
       if (hardDelete) {
         await this.executeQuery(
-          this.client
+          this.db
             .from('notes')
             .delete()
             .eq('id', noteId)
@@ -270,7 +281,7 @@ export class NotesService extends BaseService {
         )
       } else {
         await this.executeQuery(
-          this.client
+          this.db
             .from('notes')
             .update({ deleted_at: new Date().toISOString() })
             .eq('id', noteId)
@@ -297,7 +308,7 @@ export class NotesService extends BaseService {
     const { limit = 50, offset = 0, sortBy = 'created_at', sortOrder = 'desc' } = params
 
     try {
-      let query = this.client
+      let query = this.db
         .from('notes')
         .select('*', { count: 'exact' })
         .eq('user_id', userId)
@@ -324,7 +335,7 @@ export class NotesService extends BaseService {
 
     try {
       const { data } = await this.executeQueryWithCount(
-        this.client
+        this.db
           .from('notes')
           .select('tags')
           .eq('user_id', userId)
@@ -336,7 +347,7 @@ export class NotesService extends BaseService {
       if (!data) return []
 
       // Flatten and deduplicate tags
-      const allTags = (data as any[]).flatMap(note => note.tags || [])
+      const allTags = (data as Note[]).flatMap(note => note.tags || [])
       return [...new Set(allTags)].sort()
     } catch (error) {
       this.handleError(error, context)
@@ -364,7 +375,7 @@ export class SearchService extends BaseService {
 
     try {
       return await this.executeQuery(
-        this.client.rpc('search_notes', {
+        this.db.rpc('search_notes', {
           query_embedding: queryEmbedding,
           match_threshold: matchThreshold,
           match_count: matchCount,
@@ -394,7 +405,7 @@ export class SearchService extends BaseService {
 
     try {
       return await this.executeQuery(
-        this.client.rpc('hybrid_search_notes', {
+        this.db.rpc('hybrid_search_notes', {
           query_text: queryText,
           query_embedding: queryEmbedding,
           match_threshold: matchThreshold,
@@ -460,7 +471,7 @@ export class ChatService extends BaseService {
       }
 
       return await this.executeQuery(
-        this.client
+        this.db
           .from('chat_sessions')
           .insert(sessionData)
           .select()
@@ -484,7 +495,7 @@ export class ChatService extends BaseService {
 
     try {
       return await this.executeQueryWithCount(
-        this.client
+        this.db
           .from('chat_sessions')
           .select('*', { count: 'exact' })
           .eq('user_id', userId)
@@ -522,7 +533,7 @@ export class ChatService extends BaseService {
 
       // Update session's updated_at timestamp
       await this.executeQuery(
-        this.client
+        this.db
           .from('chat_sessions')
           .update({ updated_at: new Date().toISOString() })
           .eq('id', sessionId),
@@ -530,7 +541,7 @@ export class ChatService extends BaseService {
       )
 
       return await this.executeQuery(
-        this.client
+        this.db
           .from('chat_messages')
           .insert(messageData)
           .select()
@@ -554,7 +565,7 @@ export class ChatService extends BaseService {
 
     try {
       const { data } = await this.executeQueryWithCount(
-        this.client
+        this.db
           .from('chat_messages')
           .select('*')
           .eq('session_id', sessionId)
@@ -563,7 +574,7 @@ export class ChatService extends BaseService {
         context
       )
 
-      return data || []
+      return (data || []) as ChatMessage[]
     } catch (error) {
       this.handleError(error, context)
     }
@@ -577,7 +588,7 @@ export class ChatService extends BaseService {
 
     try {
       return await this.executeQuery(
-        this.client
+        this.db
           .from('chat_sessions')
           .update({ 
             title, 
@@ -603,7 +614,7 @@ export class ChatService extends BaseService {
     try {
       // Messages will be cascade deleted due to foreign key constraint
       await this.executeQuery(
-        this.client
+        this.db
           .from('chat_sessions')
           .delete()
           .eq('id', sessionId)

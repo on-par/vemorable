@@ -29,8 +29,8 @@ export function validateEnvironment(): EnvironmentConfig {
   }
 
   return {
-    supabaseUrl,
-    supabaseAnonKey,
+    supabaseUrl: supabaseUrl!,
+    supabaseAnonKey: supabaseAnonKey!,
     serviceRoleKey,
     databaseUrl,
   }

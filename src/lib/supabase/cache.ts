@@ -1,5 +1,5 @@
-import { unstable_cache, revalidateTag, revalidatePath } from 'next/cache'
-import { Note, SearchParams, PaginationParams } from './types'
+import { unstable_cache, revalidateTag } from 'next/cache'
+import { Note, SearchParams } from './types'
 import { createServerClient } from './server'
 
 /**
@@ -134,7 +134,7 @@ export const getCachedUserTags = unstable_cache(
     if (!data) return []
 
     // Flatten and deduplicate tags
-    const allTags = data.flatMap((note: any) => note.tags || [])
+    const allTags = data.flatMap((note: Note) => note.tags || [])
     return [...new Set(allTags)].sort()
   },
   ['user-tags'],
@@ -203,7 +203,7 @@ export async function invalidateChatCache(userId: string, sessionId?: string) {
  * Advanced cache manager for complex caching scenarios
  */
 export class CacheManager {
-  private cache: Map<string, { data: any; expiry: number; namespace?: string }> = new Map()
+  private cache: Map<string, { data: unknown; expiry: number; namespace?: string }> = new Map()
   private stats = {
     hits: 0,
     misses: 0,
@@ -213,7 +213,7 @@ export class CacheManager {
   /**
    * Get item from cache
    */
-  async get<T = any>(key: string, namespace?: string): Promise<T | null> {
+  async get<T = unknown>(key: string, namespace?: string): Promise<T | null> {
     const cacheKey = this.buildKey(key, namespace)
     const item = this.cache.get(cacheKey)
 
@@ -229,13 +229,13 @@ export class CacheManager {
     }
 
     this.stats.hits++
-    return item.data
+    return item.data as T
   }
 
   /**
    * Set item in cache with TTL
    */
-  async set<T = any>(
+  async set<T = unknown>(
     key: string, 
     data: T, 
     ttlSeconds: number,
@@ -328,7 +328,7 @@ export class QueryCache {
   /**
    * Wrap a function with caching
    */
-  wrap<TArgs extends any[], TReturn>(
+  wrap<TArgs extends unknown[], TReturn>(
     fn: (...args: TArgs) => Promise<TReturn>,
     keyPrefix: string,
     ttlSeconds: number
@@ -357,7 +357,7 @@ export class QueryCache {
   /**
    * Batch similar queries together
    */
-  batch<TArgs extends any[], TReturn>(
+  batch<TArgs extends unknown[], TReturn>(
     batchFn: (batchedArgs: TArgs[]) => Promise<TReturn[]>,
     keyPrefix: string,
     options: {
@@ -366,7 +366,7 @@ export class QueryCache {
     } = {}
   ) {
     const { batchSize = 10, timeout = 50 } = options
-    const pendingBatch: { args: TArgs; resolve: (value: TReturn) => void; reject: (error: any) => void }[] = []
+    const pendingBatch: { args: TArgs; resolve: (value: TReturn) => void; reject: (error: unknown) => void }[] = []
 
     let batchTimer: NodeJS.Timeout | null = null
 
@@ -411,7 +411,7 @@ export class QueryCache {
   /**
    * Prefetch data for faster access
    */
-  prefetch<TArgs extends any[], TReturn>(
+  prefetch<TArgs extends unknown[], TReturn>(
     fn: (...args: TArgs) => Promise<TReturn>,
     keyPrefix: string,
     options: {
@@ -445,7 +445,7 @@ export class QueryCache {
   /**
    * Generate cache key from function arguments
    */
-  private generateKey<TArgs extends any[]>(keyPrefix: string, args: TArgs): string {
+  private generateKey<TArgs extends unknown[]>(keyPrefix: string, args: TArgs): string {
     const argsHash = JSON.stringify(args)
     return `${keyPrefix}:${argsHash}`
   }

@@ -49,13 +49,13 @@ export type JSONValue = string | number | boolean | null | { [key: string]: JSON
 /**
  * API Response types for consistent error handling
  */
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean
   data?: T
   error?: {
     message: string
     code: string
-    details?: any
+    details?: unknown
   }
 }
 
@@ -65,13 +65,15 @@ export interface ApiResponse<T = any> {
 export class ApiError extends Error {
   public readonly code: string
   public readonly statusCode: number
-  public readonly details?: any
+  public readonly status: number // Alias for statusCode for compatibility
+  public readonly details?: unknown
 
-  constructor(message: string, statusCode: number = 500, code?: string, details?: any) {
+  constructor(message: string, statusCode: number = 500, code?: string, details?: unknown) {
     super(message)
     this.name = 'ApiError'
     this.code = code || 'INTERNAL_ERROR'
     this.statusCode = statusCode
+    this.status = statusCode // Alias for compatibility
     this.details = details
   }
 }
@@ -79,9 +81,9 @@ export class ApiError extends Error {
 /**
  * Database operation result type
  */
-export interface DatabaseResult<T = any> {
+export interface DatabaseResult<T = unknown> {
   data: T | null
-  error: Error | null
+  error: unknown
   count?: number | null
 }
 
@@ -100,7 +102,9 @@ export interface PaginationParams {
  */
 export interface SearchParams extends PaginationParams {
   query?: string
-  filters?: Record<string, any>
+  search?: string
+  tags?: string[]
+  filters?: Record<string, unknown>
 }
 
 /**
@@ -121,7 +125,7 @@ export type FilterCondition<T extends TableName> = {
                          Database['public']['Tables'][T]['Row'][K][] |
                          { 
                            operator: 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte' | 'like' | 'ilike' | 'in' | 'contains'
-                           value: any
+                           value: unknown
                          }
 }
 
@@ -160,7 +164,7 @@ export interface VectorSearchResult extends Note {
  */
 export type RealtimeEvent = 'INSERT' | 'UPDATE' | 'DELETE'
 
-export interface RealtimePayload<T = any> {
+export interface RealtimePayload<T = unknown> {
   schema: string
   table: string
   commit_timestamp: string
@@ -173,14 +177,16 @@ export interface RealtimePayload<T = any> {
 /**
  * Type guards for runtime type checking
  */
-export function isNote(obj: any): obj is Note {
-  return obj && typeof obj.id === 'string' && typeof obj.user_id === 'string' && typeof obj.title === 'string'
+export function isNote(obj: unknown): obj is Note {
+  const note = obj as Record<string, unknown>
+  return note && typeof note.id === 'string' && typeof note.user_id === 'string' && typeof note.title === 'string'
 }
 
-export function isChatMessage(obj: any): obj is ChatMessage {
-  return obj && typeof obj.id === 'string' && typeof obj.session_id === 'string' && typeof obj.content === 'string'
+export function isChatMessage(obj: unknown): obj is ChatMessage {
+  const message = obj as Record<string, unknown>
+  return message && typeof message.id === 'string' && typeof message.session_id === 'string' && typeof message.content === 'string'
 }
 
-export function isApiError(obj: any): obj is ApiError {
+export function isApiError(obj: unknown): obj is ApiError {
   return obj instanceof ApiError
 }

@@ -13,10 +13,15 @@ const searchQuerySchema = z.object({
 
 const factory = new ApiRouteFactory()
 
-export const GET = factory
+export async function GET(request: NextRequest) {
+  return factory
   .withAuth()
   .withErrorHandling()
-  .createHandler(async (req: NextRequest, context: { userId: string }) => {
+  .createHandler(async (req: NextRequest, context) => {
+    const userId = context?.userId
+    if (!userId) {
+      throw new Error('User ID not found')
+    }
     const searchService = await createSearchService()
 
     const searchParams = req.nextUrl.searchParams
@@ -40,11 +45,11 @@ export const GET = factory
       }
     }
 
-    let results: any[] = []
+    let results: unknown[] = []
 
     if (validatedData.type === 'keyword') {
       // Keyword-only search
-      const searchResults = await searchService.keywordSearch(context.userId, validatedData.query, {
+      const searchResults = await searchService.keywordSearch(userId, validatedData.query, {
         limit: validatedData.limit
       })
       results = searchResults.data || []
@@ -54,7 +59,7 @@ export const GET = factory
       
       if (validatedData.type === 'semantic') {
         results = await searchService.semanticSearch(
-          context.userId,
+          userId,
           queryEmbeddingResult.embedding,
           {
             matchThreshold: validatedData.threshold,
@@ -64,7 +69,7 @@ export const GET = factory
       } else {
         // Hybrid search (default)
         results = await searchService.hybridSearch(
-          context.userId,
+          userId,
           validatedData.query,
           queryEmbeddingResult.embedding,
           {
@@ -83,15 +88,21 @@ export const GET = factory
       threshold: validatedData.threshold,
       type: validatedData.type,
     }
-  })
+  })(request)
+}
 
-export const POST = factory
+export async function POST(request: NextRequest) {
+  return factory
   .withAuth()
   .withValidation(searchQuerySchema)
   .withErrorHandling()
-  .createHandler(async (req: NextRequest, context: { userId: string; validatedData: any }) => {
+  .createHandler(async (req: NextRequest, context) => {
+    const userId = context?.userId
+    const validatedData = context?.validatedData as z.infer<typeof searchQuerySchema>
+    if (!userId || !validatedData) {
+      throw new Error('Missing required data')
+    }
     const searchService = await createSearchService()
-    const validatedData = context.validatedData
 
     if (!validatedData.query) {
       return {
@@ -101,11 +112,11 @@ export const POST = factory
       }
     }
 
-    let results: any[] = []
+    let results: unknown[] = []
 
     if (validatedData.type === 'keyword') {
       // Keyword-only search
-      const searchResults = await searchService.keywordSearch(context.userId, validatedData.query, {
+      const searchResults = await searchService.keywordSearch(userId, validatedData.query, {
         limit: validatedData.limit
       })
       results = searchResults.data || []
@@ -115,7 +126,7 @@ export const POST = factory
       
       if (validatedData.type === 'semantic') {
         results = await searchService.semanticSearch(
-          context.userId,
+          userId,
           queryEmbeddingResult.embedding,
           {
             matchThreshold: validatedData.threshold,
@@ -125,7 +136,7 @@ export const POST = factory
       } else {
         // Hybrid search (default)
         results = await searchService.hybridSearch(
-          context.userId,
+          userId,
           validatedData.query,
           queryEmbeddingResult.embedding,
           {
@@ -144,4 +155,5 @@ export const POST = factory
       threshold: validatedData.threshold,
       type: validatedData.type,
     }
-  })
+  })(request)
+}

@@ -9,13 +9,18 @@ const createSessionSchema = z.object({
 
 const factory = new ApiRouteFactory()
 
-export const GET = factory
+export async function GET(request: NextRequest) {
+  return factory
   .withAuth()
   .withErrorHandling()
-  .createHandler(async (req: NextRequest, context: { userId: string }) => {
+  .createHandler(async (req: NextRequest, context) => {
+    const userId = context?.userId
+    if (!userId) {
+      throw new Error('User ID not found')
+    }
     const chatService = await createChatService()
     
-    const result = await chatService.getUserSessions(context.userId)
+    const result = await chatService.getUserSessions(userId)
     
     return {
       success: true,
@@ -24,21 +29,29 @@ export const GET = factory
         count: result.count || 0,
       }
     }
-  })
+  })(request)
+}
 
-export const POST = factory
+export async function POST(request: NextRequest) {
+  return factory
   .withAuth()
   .withValidation(createSessionSchema)
   .withErrorHandling()
-  .createHandler(async (req: NextRequest, context: { userId: string; validatedData: any }) => {
+  .createHandler(async (req: NextRequest, context) => {
+    const userId = context?.userId
+    const validatedData = context?.validatedData as { title?: string }
+    if (!userId) {
+      throw new Error('User ID not found')
+    }
     const chatService = await createChatService()
     
-    const sessionTitle = context.validatedData.title || `Chat ${new Date().toLocaleDateString()}`
+    const sessionTitle = validatedData?.title || `Chat ${new Date().toLocaleDateString()}`
     
-    const session = await chatService.createSession(context.userId, sessionTitle)
+    const session = await chatService.createSession(userId, sessionTitle)
     
     return {
       success: true,
       data: session
     }
-  })
+  })(request)
+}

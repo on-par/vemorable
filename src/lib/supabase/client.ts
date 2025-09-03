@@ -71,7 +71,8 @@ export class SupabaseBrowserClient {
    * Check if the client is properly configured
    */
   get isConfigured() {
-    return !!(this.client.supabaseUrl && this.client.supabaseKey)
+    // Client is configured if it was created successfully
+    return !!this.client
   }
 
   /**
@@ -92,7 +93,7 @@ export class SupabaseBrowserClient {
   /**
    * Subscribe to authentication state changes
    */
-  onAuthStateChange(callback: (event: string, session: any) => void) {
+  onAuthStateChange(callback: (event: string, session: unknown) => void) {
     return this.client.auth.onAuthStateChange(callback)
   }
 

@@ -21,9 +21,14 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     .withAuth()
     .withValidation(addMessageSchema)
     .withErrorHandling()
-    .createHandler(async (req: NextRequest, context: { userId: string; validatedData: any }) => {
+    .createHandler(async (req: NextRequest, context) => {
+      const userId = context?.userId
+      const validatedData = context?.validatedData as { role: 'user' | 'assistant' | 'system'; content: string }
+      if (!userId || !validatedData) {
+        throw new Error('Missing required data')
+      }
       const chatService = await createChatService()
-      const { role, content } = context.validatedData
+      const { role, content } = validatedData
       
       const message = await chatService.addMessage(sessionId, role, content)
       

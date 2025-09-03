@@ -6,7 +6,7 @@ import { ApiError } from '../supabase/types'
  * Get the authenticated user ID from the request
  * Throws ApiError if user is not authenticated
  */
-export async function getAuthenticatedUserId(req: NextRequest): Promise<string> {
+export async function getAuthenticatedUserId(_req: NextRequest): Promise<string> {
   try {
     const supabase = await createServerClient()
     

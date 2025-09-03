@@ -3,9 +3,15 @@ import { z } from 'zod'
 import { getAuthenticatedUserId } from './auth'
 import { ApiError } from '../supabase/types'
 
-type RequestHandler<T = any> = (
+type RequestContext = {
+  userId?: string
+  validatedData?: unknown
+  params?: Record<string, string>
+}
+
+type RequestHandler<T = unknown> = (
   req: NextRequest,
-  context?: Record<string, any>
+  context?: RequestContext
 ) => Promise<T>
 
 type RouteHandler = (
@@ -16,11 +22,12 @@ type RouteHandler = (
 interface MiddlewareOptions {
   requireAuth?: boolean
   validationSchema?: z.ZodSchema
-  errorHandler?: (error: any) => NextResponse
+  errorHandler?: (error: unknown) => NextResponse
 }
 
 export class ApiRouteFactory {
-  private middlewares: Array<(handler: RequestHandler) => RequestHandler> = []
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private middlewares: Array<(handler: RequestHandler<any>) => RequestHandler<any>> = []
   private options: MiddlewareOptions = {}
 
   withAuth(requireAuth = true): ApiRouteFactory {
@@ -29,7 +36,7 @@ export class ApiRouteFactory {
       try {
         const userId = await getAuthenticatedUserId(req)
         return handler(req, { ...context, userId })
-      } catch (error) {
+      } catch {
         throw new ApiError('Unauthorized', 401, 'UNAUTHORIZED')
       }
     })
@@ -63,13 +70,13 @@ export class ApiRouteFactory {
     return this
   }
 
-  withErrorHandling(customHandler?: (error: any) => NextResponse): ApiRouteFactory {
+  withErrorHandling(customHandler?: (error: unknown) => NextResponse): ApiRouteFactory {
     this.options.errorHandler = customHandler
     return this
   }
 
   createHandler(
-    handler: RequestHandler<{ success: boolean; data?: any; error?: any }>
+    handler: RequestHandler<{ success: boolean; data?: unknown; error?: unknown }>
   ): RouteHandler {
     return async (req, context) => {
       try {
@@ -120,7 +127,7 @@ export class ApiRouteFactory {
           )
         }
 
-        if (error.message?.includes('Unauthorized')) {
+        if (error instanceof Error && error.message?.includes('Unauthorized')) {
           return NextResponse.json(
             {
               success: false,
@@ -140,7 +147,7 @@ export class ApiRouteFactory {
             error: {
               message: 'Internal server error',
               code: 'INTERNAL_ERROR',
-              details: { message: error.message },
+              details: { message: error instanceof Error ? error.message : String(error) },
             },
           },
           { status: 500 }

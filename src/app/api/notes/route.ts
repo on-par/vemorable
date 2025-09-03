@@ -15,7 +15,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const search = searchParams.get('search') || undefined
     const tags = searchParams.get('tags')?.split(',').filter(Boolean) || undefined
     const sortBy = searchParams.get('sortBy') || undefined
-    const sortOrder = searchParams.get('sortOrder') || undefined
+    const sortOrder = searchParams.get('sortOrder') === 'desc' ? 'desc' : searchParams.get('sortOrder') === 'asc' ? 'asc' : undefined
 
     const result = await notesService.getNotes(userId, {
       limit,

@@ -15,10 +15,14 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   return factory
     .withAuth()
     .withErrorHandling()
-    .createHandler(async (req: NextRequest, context: { userId: string }) => {
+    .createHandler(async (req: NextRequest, context) => {
+      const userId = context?.userId
+      if (!userId) {
+        throw new Error('User ID not found')
+      }
       const notesService = await createNotesService()
       
-      const note = await notesService.getNote(id, context.userId)
+      const note = await notesService.getNote(id, userId)
       
       if (!note) {
         return {
@@ -44,10 +48,15 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     .withAuth()
     .withValidation(updateNoteSchema)
     .withErrorHandling()
-    .createHandler(async (req: NextRequest, context: { userId: string; validatedData: any }) => {
+    .createHandler(async (req: NextRequest, context) => {
+      const userId = context?.userId
+      const validatedData = context?.validatedData
+      if (!userId || !validatedData) {
+        throw new Error('Missing required data')
+      }
       const notesService = await createNotesService()
       
-      const updatedNote = await notesService.updateNote(id, context.userId, context.validatedData)
+      const updatedNote = await notesService.updateNote(id, userId, validatedData)
 
       return {
         success: true,
@@ -64,10 +73,14 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
   return factory
     .withAuth()
     .withErrorHandling()
-    .createHandler(async (req: NextRequest, context: { userId: string }) => {
+    .createHandler(async (req: NextRequest, context) => {
+      const userId = context?.userId
+      if (!userId) {
+        throw new Error('User ID not found')
+      }
       const notesService = await createNotesService()
       
-      await notesService.deleteNote(id, context.userId, hard)
+      await notesService.deleteNote(id, userId, hard)
 
       return {
         success: true

@@ -159,11 +159,14 @@ export class SupabaseServerClient {
   /**
    * Execute RPC with proper error handling
    */
-  async rpc<T = any>(
+  async rpc<T = unknown>(
     functionName: string, 
-    params?: Record<string, any>
+    params?: Record<string, unknown>
   ): Promise<T> {
-    const { data, error } = await this.client.rpc(functionName, params)
+    const { data, error } = params 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ? await (this.client.rpc as any)(functionName, params)
+      : await this.client.rpc(functionName)
     
     if (error) {
       console.error(`RPC ${functionName} error:`, error)
@@ -176,10 +179,10 @@ export class SupabaseServerClient {
   /**
    * Execute query with proper error handling
    */
-  async query<T = any>(
-    queryBuilder: any
+  async query<T = unknown>(
+    queryBuilder: unknown
   ): Promise<T> {
-    const { data, error } = await queryBuilder
+    const { data, error } = await queryBuilder as { data: T; error: unknown }
     
     if (error) {
       console.error('Query error:', error)
