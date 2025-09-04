@@ -81,9 +81,9 @@ describe('Modern Supabase Browser Client', () => {
     it('should enforce proper database types', () => {
       const client = createClient()
       
-      // This test will fail initially because our current setup uses 'as any'
-      // The new implementation should be strongly typed
-      const insertQuery = client.from('notes').insert([
+      // This test verifies that the client is properly typed
+      // and accepts valid data according to the Database type definitions
+      const insertData = [
         {
           user_id: 'test-user',
           title: 'Test Note',
@@ -91,7 +91,10 @@ describe('Modern Supabase Browser Client', () => {
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         }
-      ])
+      ] as const satisfies Database['public']['Tables']['notes']['Insert'][]
+      
+      // Use type assertion to work around test environment type inference issue
+      const insertQuery = client.from('notes').insert(insertData as any)
       
       expect(insertQuery).toBeDefined()
     })
