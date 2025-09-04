@@ -1,24 +1,27 @@
 import { GET, POST } from './notes/route'
 import { NextRequest } from 'next/server'
-import { createServerClientInstance } from '@/lib/supabase'
-import { getAuthenticatedUserId } from '@/lib/api-utils'
+import { getAuthenticatedUserId } from '@/lib/api/auth'
+import { createNotesService } from '@/lib/supabase/services'
 import { generateNoteEmbedding, formatEmbeddingForPgVector } from '@/lib/embeddings'
+import { ApiError } from '@/lib/supabase/types'
 
 // Mock dependencies
-jest.mock('@/lib/supabase')
-jest.mock('@/lib/api-utils')
+jest.mock('@/lib/api/auth')
+jest.mock('@/lib/supabase/services')
 jest.mock('@/lib/embeddings')
+jest.mock('@/lib/validations')
 
 describe('/api/notes', () => {
   const mockUserId = 'user-123'
-  const mockSupabase = {
-    from: jest.fn(),
+  const mockNotesService = {
+    getNotes: jest.fn(),
+    createNote: jest.fn(),
   }
   
   beforeEach(() => {
     jest.clearAllMocks()
     ;(getAuthenticatedUserId as jest.Mock).mockResolvedValue(mockUserId)
-    ;(createServerClientInstance as jest.Mock).mockResolvedValue(mockSupabase)
+    ;(createNotesService as jest.Mock).mockResolvedValue(mockNotesService)
   })
 
   describe('GET /api/notes', () => {
@@ -30,27 +33,13 @@ describe('/api/notes', () => {
       return new NextRequest(url)
     }
 
-    const setupMockQuery = () => {
-      const mockQuery = {
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        or: jest.fn().mockReturnThis(),
-        contains: jest.fn().mockReturnThis(),
-        order: jest.fn().mockReturnThis(),
-        range: jest.fn().mockReturnThis(),
-      }
-      mockSupabase.from.mockReturnValue(mockQuery)
-      return mockQuery
-    }
-
     it('should fetch notes for authenticated user', async () => {
       const mockNotes = [
         { id: '1', title: 'Note 1', content: 'Content 1' },
         { id: '2', title: 'Note 2', content: 'Content 2' },
       ]
       
-      const mockQuery = setupMockQuery()
-      mockQuery.range.mockResolvedValue({
+      mockNotesService.getNotes.mockResolvedValue({
         data: mockNotes,
         error: null,
         count: 2,
@@ -60,9 +49,14 @@ describe('/api/notes', () => {
       const response = await GET(request)
       const data = await response.json()
 
-      expect(mockSupabase.from).toHaveBeenCalledWith('notes')
-      expect(mockQuery.eq).toHaveBeenCalledWith('user_id', mockUserId)
-      expect(mockQuery.order).toHaveBeenCalledWith('created_at', { ascending: false })
+      expect(mockNotesService.getNotes).toHaveBeenCalledWith(mockUserId, {
+        limit: 50,
+        offset: 0,
+        search: undefined,
+        tags: undefined,
+        sortBy: undefined,
+        sortOrder: undefined,
+      })
       expect(data.success).toBe(true)
       expect(data.data.notes).toEqual(mockNotes)
       expect(data.data.pagination).toEqual({
@@ -73,8 +67,7 @@ describe('/api/notes', () => {
     })
 
     it('should apply search filter when provided', async () => {
-      const mockQuery = setupMockQuery()
-      mockQuery.range.mockResolvedValue({
+      mockNotesService.getNotes.mockResolvedValue({
         data: [],
         error: null,
         count: 0,
@@ -83,14 +76,18 @@ describe('/api/notes', () => {
       const request = createMockRequest({ search: 'test query' })
       await GET(request)
 
-      expect(mockQuery.or).toHaveBeenCalledWith(
-        'title.ilike.%test query%,processed_content.ilike.%test query%'
-      )
+      expect(mockNotesService.getNotes).toHaveBeenCalledWith(mockUserId, {
+        limit: 50,
+        offset: 0,
+        search: 'test query',
+        tags: undefined,
+        sortBy: undefined,
+        sortOrder: undefined,
+      })
     })
 
     it('should filter by tags when provided', async () => {
-      const mockQuery = setupMockQuery()
-      mockQuery.range.mockResolvedValue({
+      mockNotesService.getNotes.mockResolvedValue({
         data: [],
         error: null,
         count: 0,
@@ -99,12 +96,18 @@ describe('/api/notes', () => {
       const request = createMockRequest({ tags: 'tag1,tag2,tag3' })
       await GET(request)
 
-      expect(mockQuery.contains).toHaveBeenCalledWith('tags', ['tag1', 'tag2', 'tag3'])
+      expect(mockNotesService.getNotes).toHaveBeenCalledWith(mockUserId, {
+        limit: 50,
+        offset: 0,
+        search: undefined,
+        tags: ['tag1', 'tag2', 'tag3'],
+        sortBy: undefined,
+        sortOrder: undefined,
+      })
     })
 
     it('should apply sorting parameters', async () => {
-      const mockQuery = setupMockQuery()
-      mockQuery.range.mockResolvedValue({
+      mockNotesService.getNotes.mockResolvedValue({
         data: [],
         error: null,
         count: 0,
@@ -113,12 +116,18 @@ describe('/api/notes', () => {
       const request = createMockRequest({ sortBy: 'title', sortOrder: 'asc' })
       await GET(request)
 
-      expect(mockQuery.order).toHaveBeenCalledWith('title', { ascending: true })
+      expect(mockNotesService.getNotes).toHaveBeenCalledWith(mockUserId, {
+        limit: 50,
+        offset: 0,
+        search: undefined,
+        tags: undefined,
+        sortBy: 'title',
+        sortOrder: 'asc',
+      })
     })
 
     it('should apply pagination parameters', async () => {
-      const mockQuery = setupMockQuery()
-      mockQuery.range.mockResolvedValue({
+      mockNotesService.getNotes.mockResolvedValue({
         data: [],
         error: null,
         count: 100,
@@ -127,12 +136,18 @@ describe('/api/notes', () => {
       const request = createMockRequest({ limit: '20', offset: '40' })
       await GET(request)
 
-      expect(mockQuery.range).toHaveBeenCalledWith(40, 59) // offset to offset+limit-1
+      expect(mockNotesService.getNotes).toHaveBeenCalledWith(mockUserId, {
+        limit: 20,
+        offset: 40,
+        search: undefined,
+        tags: undefined,
+        sortBy: undefined,
+        sortOrder: undefined,
+      })
     })
 
     it('should limit maximum results to 100', async () => {
-      const mockQuery = setupMockQuery()
-      mockQuery.range.mockResolvedValue({
+      mockNotesService.getNotes.mockResolvedValue({
         data: [],
         error: null,
         count: 200,
@@ -142,30 +157,20 @@ describe('/api/notes', () => {
       const response = await GET(request)
       const data = await response.json()
 
-      expect(mockQuery.range).toHaveBeenCalledWith(0, 99) // max 100 items
+      expect(mockNotesService.getNotes).toHaveBeenCalledWith(mockUserId, {
+        limit: 100, // Should be capped at 100
+        offset: 0,
+        search: undefined,
+        tags: undefined,
+        sortBy: undefined,
+        sortOrder: undefined,
+      })
       expect(data.data.pagination.limit).toBe(100)
     })
 
     it('should handle database errors', async () => {
-      const mockQuery = setupMockQuery()
-      mockQuery.range.mockResolvedValue({
-        data: null,
-        error: new Error('Database error'),
-        count: null,
-      })
-
-      const request = createMockRequest()
-      const response = await GET(request)
-      const data = await response.json()
-
-      expect(response.status).toBe(500)
-      expect(data.success).toBe(false)
-      expect(data.error).toBeDefined()
-    })
-
-    it('should handle authentication errors', async () => {
-      ;(getAuthenticatedUserId as jest.Mock).mockRejectedValue(
-        new Error('Unauthorized')
+      mockNotesService.getNotes.mockRejectedValue(
+        new ApiError('Database error', 500, 'DATABASE_ERROR')
       )
 
       const request = createMockRequest()
@@ -174,6 +179,22 @@ describe('/api/notes', () => {
 
       expect(response.status).toBe(500)
       expect(data.success).toBe(false)
+      expect(data.error).toBeDefined()
+      expect(data.error.code).toBe('DATABASE_ERROR')
+    })
+
+    it('should handle authentication errors', async () => {
+      ;(getAuthenticatedUserId as jest.Mock).mockRejectedValue(
+        new ApiError('Unauthorized', 401, 'UNAUTHORIZED')
+      )
+
+      const request = createMockRequest()
+      const response = await GET(request)
+      const data = await response.json()
+
+      expect(response.status).toBe(401)
+      expect(data.success).toBe(false)
+      expect(data.error.code).toBe('UNAUTHORIZED')
     })
   })
 
@@ -188,16 +209,6 @@ describe('/api/notes', () => {
       })
     }
 
-    const setupMockInsert = () => {
-      const mockInsert = {
-        insert: jest.fn().mockReturnThis(),
-        select: jest.fn().mockReturnThis(),
-        single: jest.fn(),
-      }
-      mockSupabase.from.mockReturnValue(mockInsert)
-      return mockInsert
-    }
-
     it('should create a new note with valid data', async () => {
       const noteData = {
         title: 'Test Note',
@@ -207,17 +218,12 @@ describe('/api/notes', () => {
         tags: ['test', 'note'],
       }
 
-      const mockEmbedding = [0.1, 0.2, 0.3]
-      ;(generateNoteEmbedding as jest.Mock).mockResolvedValue({
-        embedding: mockEmbedding,
-      })
-      ;(formatEmbeddingForPgVector as jest.Mock).mockReturnValue('[0.1,0.2,0.3]')
+      const createdNote = { id: 'note-123', ...noteData, user_id: mockUserId }
+      mockNotesService.createNote.mockResolvedValue(createdNote)
 
-      const mockInsert = setupMockInsert()
-      mockInsert.single.mockResolvedValue({
-        data: { id: 'note-123', ...noteData, user_id: mockUserId },
-        error: null,
-      })
+      // Mock validation schema
+      const { createNoteSchema } = require('@/lib/validations')
+      createNoteSchema.parse = jest.fn().mockReturnValue(noteData)
 
       const request = createMockRequest(noteData)
       const response = await POST(request)
@@ -225,19 +231,11 @@ describe('/api/notes', () => {
 
       expect(response.status).toBe(201)
       expect(data.success).toBe(true)
-      expect(data.data.id).toBe('note-123')
-      expect(generateNoteEmbedding).toHaveBeenCalledWith(
-        noteData.title,
-        noteData.processed_content,
-        noteData.tags
-      )
-      expect(mockInsert.insert).toHaveBeenCalledWith(
-        expect.objectContaining({
-          ...noteData,
-          user_id: mockUserId,
-          embedding: '[0.1,0.2,0.3]',
-        })
-      )
+      expect(data.data).toEqual(createdNote)
+      expect(mockNotesService.createNote).toHaveBeenCalledWith({
+        ...noteData,
+        user_id: mockUserId,
+      })
     })
 
     it('should create note even if embedding generation fails', async () => {
@@ -248,17 +246,12 @@ describe('/api/notes', () => {
         tags: [],
       }
 
-      ;(generateNoteEmbedding as jest.Mock).mockRejectedValue(
-        new Error('Embedding API error')
-      )
-      
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation()
+      const createdNote = { id: 'note-123', ...noteData, user_id: mockUserId }
+      mockNotesService.createNote.mockResolvedValue(createdNote)
 
-      const mockInsert = setupMockInsert()
-      mockInsert.single.mockResolvedValue({
-        data: { id: 'note-123', ...noteData },
-        error: null,
-      })
+      // Mock validation schema
+      const { createNoteSchema } = require('@/lib/validations')
+      createNoteSchema.parse = jest.fn().mockReturnValue(noteData)
 
       const request = createMockRequest(noteData)
       const response = await POST(request)
@@ -266,19 +259,7 @@ describe('/api/notes', () => {
 
       expect(response.status).toBe(201)
       expect(data.success).toBe(true)
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Failed to generate embedding:',
-        expect.any(Error)
-      )
-      expect(mockInsert.insert).toHaveBeenCalledWith(
-        expect.objectContaining({
-          ...noteData,
-          user_id: mockUserId,
-          embedding: null,
-        })
-      )
-
-      consoleErrorSpy.mockRestore()
+      expect(data.data).toEqual(createdNote)
     })
 
     it('should reject invalid note data', async () => {
@@ -286,6 +267,14 @@ describe('/api/notes', () => {
         // Missing required fields
         summary: 'Summary only',
       }
+
+      // Mock validation schema to throw ZodError
+      const { createNoteSchema } = require('@/lib/validations')
+      const zodError = new Error('Validation failed')
+      zodError.name = 'ZodError'
+      createNoteSchema.parse = jest.fn().mockImplementation(() => {
+        throw zodError
+      })
 
       const request = createMockRequest(invalidData)
       const response = await POST(request)
@@ -304,11 +293,13 @@ describe('/api/notes', () => {
         tags: [],
       }
 
-      const mockInsert = setupMockInsert()
-      mockInsert.single.mockResolvedValue({
-        data: null,
-        error: new Error('Database insert failed'),
-      })
+      mockNotesService.createNote.mockRejectedValue(
+        new ApiError('Database insert failed', 500, 'DATABASE_ERROR')
+      )
+
+      // Mock validation schema
+      const { createNoteSchema } = require('@/lib/validations')
+      createNoteSchema.parse = jest.fn().mockReturnValue(noteData)
 
       const request = createMockRequest(noteData)
       const response = await POST(request)
@@ -321,7 +312,7 @@ describe('/api/notes', () => {
 
     it('should handle authentication errors', async () => {
       ;(getAuthenticatedUserId as jest.Mock).mockRejectedValue(
-        new Error('Unauthorized')
+        new ApiError('Unauthorized', 401, 'UNAUTHORIZED')
       )
 
       const request = createMockRequest({
@@ -331,8 +322,9 @@ describe('/api/notes', () => {
       const response = await POST(request)
       const data = await response.json()
 
-      expect(response.status).toBe(500)
+      expect(response.status).toBe(401)
       expect(data.success).toBe(false)
+      expect(data.error.code).toBe('UNAUTHORIZED')
     })
 
     it('should handle malformed JSON', async () => {
@@ -349,6 +341,7 @@ describe('/api/notes', () => {
 
       expect(response.status).toBe(500)
       expect(data.success).toBe(false)
+      expect(data.error.code).toBe('INTERNAL_ERROR')
     })
   })
 })

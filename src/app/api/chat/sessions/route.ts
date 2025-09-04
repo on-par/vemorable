@@ -1,68 +1,57 @@
 import { NextRequest } from 'next/server'
-import { createServerClientInstance } from '@/lib/supabase'
-import {
-  successResponse,
-  handleApiError,
-  getAuthenticatedUserId,
-} from '@/lib/api-utils'
+import { createChatService } from '@/lib/supabase/services'
+import { ApiRouteFactory } from '@/lib/api/factory'
 import { z } from 'zod'
 
 const createSessionSchema = z.object({
   title: z.string().min(1).max(100).optional(),
 })
 
-export async function GET() {
-  try {
-    const userId = await getAuthenticatedUserId()
-    const supabase = await createServerClientInstance()
-    
-    const { data: sessions, error } = await supabase
-      .from('chat_sessions')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-    
-    if (error) {
-      console.error('Failed to fetch chat sessions:', error)
-      throw error
+const factory = new ApiRouteFactory()
+
+export async function GET(request: NextRequest) {
+  return factory
+  .withAuth()
+  .withErrorHandling()
+  .createHandler(async (req: NextRequest, context) => {
+    const userId = context?.userId
+    if (!userId) {
+      throw new Error('User ID not found')
     }
+    const chatService = await createChatService()
     
-    return successResponse({
-      sessions: sessions || [],
-      count: sessions?.length || 0,
-    })
-  } catch (error) {
-    return handleApiError(error)
-  }
+    const result = await chatService.getUserSessions(userId)
+    
+    return {
+      success: true,
+      data: {
+        sessions: result.data || [],
+        count: result.count || 0,
+      }
+    }
+  })(request)
 }
 
 export async function POST(request: NextRequest) {
-  try {
-    const userId = await getAuthenticatedUserId()
-    const supabase = await createServerClientInstance()
-    
-    const body = await request.json()
-    const validatedData = createSessionSchema.parse(body)
-    
-    const sessionTitle = validatedData.title || `Chat ${new Date().toLocaleDateString()}`
-    
-    const { data: session, error } = await supabase
-      .from('chat_sessions')
-      .insert({
-        user_id: userId,
-        title: sessionTitle,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
-      .select()
-      .single()
-    
-    if (error) {
-      console.error('Failed to create chat session:', error)
-      throw error
+  return factory
+  .withAuth()
+  .withValidation(createSessionSchema)
+  .withErrorHandling()
+  .createHandler(async (req: NextRequest, context) => {
+    const userId = context?.userId
+    const validatedData = context?.validatedData as { title?: string }
+    if (!userId) {
+      throw new Error('User ID not found')
     }
+    const chatService = await createChatService()
     
-    return successResponse(session)
-  } catch (error) {
-    return handleApiError(error)
-  }
+    const sessionTitle = validatedData?.title || `Chat ${new Date().toLocaleDateString()}`
+    
+    const session = await chatService.createSession(userId, sessionTitle)
+    
+    return {
+      success: true,
+      data: session
+    }
+  })(request)
 }

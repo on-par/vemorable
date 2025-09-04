@@ -42,21 +42,6 @@ export default function NoteCard({
     });
   };
 
-  const handleDelete = async () => {
-    try {
-      const response = await fetch(`/api/notes/${note.id}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        onDelete(note.id);
-      }
-      setShowDeleteConfirm(false);
-    } catch (error) {
-      console.error('Failed to delete note:', error);
-      setShowDeleteConfirm(false);
-    }
-  };
 
   return (
     <div
