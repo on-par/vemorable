@@ -126,7 +126,7 @@ export default function VoiceNoteModal({ isOpen, onClose, onNoteCreated }: Voice
         },
         body: JSON.stringify({
           raw_transcript: transcript,
-          processed_content: processedData.data.processed_content,
+          processed_content: processedData.data.processedContent,
           title: processedData.data.title,
           summary: processedData.data.summary,
           tags: processedData.data.tags,
@@ -178,7 +178,7 @@ export default function VoiceNoteModal({ isOpen, onClose, onNoteCreated }: Voice
         },
         body: JSON.stringify({
           raw_transcript: textContent,
-          processed_content: processedData.data.processed_content,
+          processed_content: processedData.data.processedContent,
           title: processedData.data.title,
           summary: processedData.data.summary,
           tags: processedData.data.tags,

@@ -614,19 +614,19 @@ export class ChatService extends BaseService {
  * Convenience factory functions
  */
 export async function createNotesService(): Promise<NotesService> {
-  const { createServerClient } = await import('./server')
-  const client = await createServerClient()
+  const { createServiceClient } = await import('./server')
+  const client = await createServiceClient()
   return new NotesService(client)
 }
 
 export async function createSearchService(): Promise<SearchService> {
-  const { createServerClient } = await import('./server')
-  const client = await createServerClient()
+  const { createServiceClient } = await import('./server')
+  const client = await createServiceClient()
   return new SearchService(client)
 }
 
 export async function createChatService(): Promise<ChatService> {
-  const { createServerClient } = await import('./server')
-  const client = await createServerClient()
+  const { createServiceClient } = await import('./server')
+  const client = await createServiceClient()
   return new ChatService(client)
 }
