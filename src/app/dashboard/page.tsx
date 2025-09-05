@@ -41,7 +41,7 @@ export default function DashboardPage() {
           throw new Error('Failed to fetch notes');
         }
         const data = await response.json();
-        setNotes(data.data || []);
+        setNotes(data.data?.notes || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load notes');
       } finally {
