@@ -1,4 +1,4 @@
-import { createServerClient } from '../supabase/server'
+import { auth } from '@clerk/nextjs/server'
 import { ApiError } from '../supabase/types'
 
 /**
@@ -7,18 +7,14 @@ import { ApiError } from '../supabase/types'
  */
 export async function getAuthenticatedUserId(): Promise<string> {
   try {
-    const supabase = await createServerClient()
-    
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser()
+    // Try to get the user from Clerk
+    const { userId } = await auth()
 
-    if (error || !user) {
+    if (!userId) {
       throw new ApiError('Unauthorized', 401, 'UNAUTHORIZED')
     }
 
-    return user.id
+    return userId
   } catch (error) {
     if (error instanceof ApiError) {
       throw error
