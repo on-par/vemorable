@@ -4,16 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { VoiceRecorder } from './VoiceRecorder';
 import { FileUpload } from './FileUpload';
 import { useAuth } from '@clerk/nextjs';
-
-interface Note {
-  id: string;
-  title: string;
-  summary: string;
-  tags: string[];
-  created_at: string;
-  processed_content: string;
-  raw_transcript?: string;
-}
+import type { Note, TranscriptionResponse, ProcessNoteResponse, CreateNoteResponse } from '@/types/voice-note.types';
 
 interface VoiceNoteModalProps {
   isOpen: boolean;
@@ -29,6 +20,8 @@ export default function VoiceNoteModal({ isOpen, onClose, onNoteCreated }: Voice
   const [error, setError] = useState<string | null>(null);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [transcription, setTranscription] = useState<string | null>(null);
+  const [isTranscribing, setIsTranscribing] = useState(false);
 
   // Reset state when modal closes
   useEffect(() => {
@@ -39,12 +32,47 @@ export default function VoiceNoteModal({ isOpen, onClose, onNoteCreated }: Voice
       setAudioBlob(null);
       setSelectedFiles([]);
       setIsProcessing(false);
+      setTranscription(null);
+      setIsTranscribing(false);
     }
   }, [isOpen]);
 
   // Handle voice recording completion
-  const handleRecordingComplete = (blob: Blob) => {
+  const handleRecordingComplete = async (blob: Blob) => {
     setAudioBlob(blob);
+    setError(null);
+    setTranscription(null);
+    
+    // Auto-transcribe when recording completes
+    if (userId) {
+      setIsTranscribing(true);
+      try {
+        const formData = new FormData();
+        formData.append('audio', blob, 'recording.webm');
+        
+        const response = await fetch('/api/transcribe', {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to transcribe audio');
+        }
+        
+        const data: TranscriptionResponse = await response.json();
+        const text = data.data?.text || data.text;
+        
+        if (text) {
+          setTranscription(text);
+        }
+      } catch {
+        // Don't show error for transcription, user can still save manually
+        // Error is silent to not interrupt user experience
+      } finally {
+        setIsTranscribing(false);
+      }
+    }
   };
 
   // Handle transcription and note creation for voice
@@ -68,8 +96,8 @@ export default function VoiceNoteModal({ isOpen, onClose, onNoteCreated }: Voice
         throw new Error('Failed to transcribe audio');
       }
 
-      const transcribeData = await transcribeResponse.json();
-      const transcript = transcribeData.data?.text || transcribeData.text;
+      const transcribeData: TranscriptionResponse = await transcribeResponse.json();
+      const transcript = transcription || transcribeData.data?.text || transcribeData.text;
 
       if (!transcript) {
         throw new Error('No transcription received');
@@ -88,7 +116,7 @@ export default function VoiceNoteModal({ isOpen, onClose, onNoteCreated }: Voice
         throw new Error('Failed to process note');
       }
 
-      const processedData = await processResponse.json();
+      const processedData: ProcessNoteResponse = await processResponse.json();
 
       // Step 3: Create note in database
       const createResponse = await fetch('/api/notes', {
@@ -109,7 +137,7 @@ export default function VoiceNoteModal({ isOpen, onClose, onNoteCreated }: Voice
         throw new Error('Failed to save note');
       }
 
-      const { data: newNote } = await createResponse.json();
+      const { data: newNote }: CreateNoteResponse = await createResponse.json();
       onNoteCreated(newNote);
       onClose();
     } catch (err) {
@@ -140,7 +168,7 @@ export default function VoiceNoteModal({ isOpen, onClose, onNoteCreated }: Voice
         throw new Error('Failed to process note');
       }
 
-      const processedData = await processResponse.json();
+      const processedData: ProcessNoteResponse = await processResponse.json();
 
       // Step 2: Create note in database
       const createResponse = await fetch('/api/notes', {
@@ -161,7 +189,7 @@ export default function VoiceNoteModal({ isOpen, onClose, onNoteCreated }: Voice
         throw new Error('Failed to save note');
       }
 
-      const { data: newNote } = await createResponse.json();
+      const { data: newNote }: CreateNoteResponse = await createResponse.json();
       onNoteCreated(newNote);
       onClose();
     } catch (err) {
@@ -215,7 +243,11 @@ export default function VoiceNoteModal({ isOpen, onClose, onNoteCreated }: Voice
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={(e) => {
+      if (e.target === e.currentTarget && !isProcessing && !isTranscribing) {
+        onClose();
+      }
+    }}>
       <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Modal Header */}
         <div className="sticky top-0 bg-white border-b px-6 py-4">
@@ -292,11 +324,42 @@ export default function VoiceNoteModal({ isOpen, onClose, onNoteCreated }: Voice
                 maxDuration={300}
               />
               
+              {/* Transcription display */}
+              {isTranscribing && (
+                <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                    <p className="text-sm text-blue-700">Transcribing audio...</p>
+                  </div>
+                </div>
+              )}
+              
+              {transcription && !isTranscribing && (
+                <div className="mt-4 p-4 bg-green-50 rounded-lg">
+                  <h3 className="text-sm font-semibold text-green-800 mb-2">Transcription:</h3>
+                  <p className="text-sm text-green-700">{transcription}</p>
+                </div>
+              )}
+              
               {audioBlob && !isProcessing && (
-                <div className="mt-6 flex justify-center">
+                <div className="mt-6 flex justify-center gap-3">
+                  <button
+                    onClick={() => {
+                      setAudioBlob(null);
+                      setTranscription(null);
+                      setError(null);
+                    }}
+                    className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors flex items-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Retry
+                  </button>
                   <button
                     onClick={handleVoiceSubmit}
-                    className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+                    disabled={isTranscribing}
+                    className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -363,6 +426,7 @@ export default function VoiceNoteModal({ isOpen, onClose, onNoteCreated }: Voice
             <div className="mt-6 flex flex-col items-center gap-3">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
               <p className="text-gray-600">Processing your note...</p>
+              <p className="text-sm text-gray-500">This may take a moment</p>
             </div>
           )}
         </div>

@@ -115,8 +115,6 @@ export default function NotesList({ notes, onNoteDeleted, onNoteUpdated }: Notes
 
   const handleNoteEdit = useCallback((note: Note) => {
     // This would typically open an edit modal or navigate to an edit page
-    // For now, we'll just log it
-    console.log('Edit note:', note);
     if (onNoteUpdated) {
       // Placeholder for edit functionality
       onNoteUpdated(note);

@@ -180,7 +180,7 @@ describe('/api/transcribe', () => {
       expect(response.status).toBe(400)
       expect(data.success).toBe(false)
       expect(data.error.code).toBe('MISSING_AUDIO_FILE')
-      expect(data.error.message).toBe('No audio file provided')
+      expect(data.error.message).toBe('No audio file provided. Please record or upload an audio file.')
     })
 
     it('should reject files exceeding size limit', async () => {
@@ -195,7 +195,7 @@ describe('/api/transcribe', () => {
       expect(response.status).toBe(400)
       expect(data.success).toBe(false)
       expect(data.error.code).toBe('FILE_TOO_LARGE')
-      expect(data.error.message).toContain('File size exceeds maximum limit')
+      expect(data.error.message).toContain('Audio file is too large')
     })
 
     it('should accept valid audio formats', async () => {
@@ -288,7 +288,7 @@ describe('/api/transcribe', () => {
       expect(response.status).toBe(500)
       expect(data.success).toBe(false)
       expect(data.error.code).toBe('CONFIGURATION_ERROR')
-      expect(data.error.message).toBe('OpenAI API key not configured')
+      expect(data.error.message).toBe('OpenAI API key not configured. Please contact support.')
     })
   })
 
@@ -312,7 +312,7 @@ describe('/api/transcribe', () => {
       expect(response.status).toBe(500)
       expect(data.success).toBe(false)
       expect(data.error.code).toBe('INVALID_API_KEY')
-      expect(data.error.message).toBe('Invalid OpenAI API key')
+      expect(data.error.message).toBe('Authentication failed with OpenAI API. Please contact support.')
     })
 
     it('should handle rate limit error', async () => {
@@ -334,7 +334,7 @@ describe('/api/transcribe', () => {
       expect(response.status).toBe(429)
       expect(data.success).toBe(false)
       expect(data.error.code).toBe('RATE_LIMIT_EXCEEDED')
-      expect(data.error.message).toContain('rate limit exceeded')
+      expect(data.error.message).toBe('We are experiencing high demand. Please wait a moment and try again.')
     })
 
     it('should handle file too large error from OpenAI', async () => {
@@ -356,7 +356,7 @@ describe('/api/transcribe', () => {
       expect(response.status).toBe(413)
       expect(data.success).toBe(false)
       expect(data.error.code).toBe('FILE_TOO_LARGE')
-      expect(data.error.message).toBe('Audio file is too large for processing')
+      expect(data.error.message).toBe('Your audio file is too large for processing. Please record a shorter message (max 25MB).')
     })
 
     it('should handle generic OpenAI API errors', async () => {
@@ -375,7 +375,7 @@ describe('/api/transcribe', () => {
       const response = await POST(request)
       const data = await response.json()
       
-      expect(response.status).toBe(500)
+      expect(response.status).toBe(503)
       expect(data.success).toBe(false)
       expect(data.error).toBeDefined()
     })
