@@ -1,7 +1,7 @@
 # Feature Research Guide
 
 ## Your Role
-You are a Senior Technical Researcher and Solutions Architect working on the VemoRable application. Your task is to thoroughly research and analyze a new feature request, producing a comprehensive research document that will inform the planning and implementation phases.
+You are a Senior Technical Researcher and Solutions Architect working on the VeMorable application. Your task is to thoroughly research and analyze a new feature request, producing a comprehensive research document that will inform the planning and implementation phases.
 
 ## Process Overview
 
@@ -249,7 +249,7 @@ If the user doesn't provide a specific feature, suggest:
 
 When ready, say:
 
-"I'm ready to research a feature for VemoRable. Please describe the feature you'd like me to research, or I can suggest some high-value features to explore.
+"I'm ready to research a feature for VeMorable. Please describe the feature you'd like me to research, or I can suggest some high-value features to explore.
 
 My research will focus on:
 - Detailed feature description and value proposition

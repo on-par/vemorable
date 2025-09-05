@@ -23,7 +23,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-gray-900">VemoRable</h1>
+              <h1 className="text-2xl font-bold text-gray-900">VeMorable</h1>
             </div>
             <div className="flex items-center space-x-4">
               <SignInButton mode="modal">
@@ -196,7 +196,7 @@ export default function Home() {
                 ))}
               </div>
               <p className="text-gray-600 mb-4">
-                &quot;As someone with ADHD, VemoRable has been a game-changer. I can finally capture my scattered thoughts and actually find them later!&quot;
+                &quot;As someone with ADHD, VeMorable has been a game-changer. I can finally capture my scattered thoughts and actually find them later!&quot;
               </p>
               <div className="font-semibold text-gray-900">Sarah Chen</div>
               <div className="text-sm text-gray-500">Product Designer</div>
@@ -226,7 +226,7 @@ export default function Home() {
                 ))}
               </div>
               <p className="text-gray-600 mb-4">
-                &quot;I process information verbally, and VemoRable gets that. Speaking my thoughts and having them organized automatically is magical.&quot;
+                &quot;I process information verbally, and VeMorable gets that. Speaking my thoughts and having them organized automatically is magical.&quot;
               </p>
               <div className="font-semibold text-gray-900">Emily Rodriguez</div>
               <div className="text-sm text-gray-500">Executive Coach</div>
@@ -257,7 +257,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-white font-semibold text-lg mb-4">VemoRable</h3>
+              <h3 className="text-white font-semibold text-lg mb-4">VeMorable</h3>
               <p className="text-sm">
                 Voice-first AI-powered note-taking for verbal processors and creative thinkers.
               </p>
@@ -288,7 +288,7 @@ export default function Home() {
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
-            <p>&copy; 2024 VemoRable. All rights reserved.</p>
+            <p>&copy; 2024 VeMorable. All rights reserved.</p>
           </div>
         </div>
       </footer>

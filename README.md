@@ -1,6 +1,6 @@
-# VemoRable
+# VeMorable
 
-VemoRable is a voice-first AI-powered note-taking micro SaaS application that enables verbal processors to capture thoughts via voice, automatically organize them with AI, and interact with their knowledge base through natural conversation.
+VeMorable is a voice-first AI-powered note-taking micro SaaS application that enables verbal processors to capture thoughts via voice, automatically organize them with AI, and interact with their knowledge base through natural conversation.
 
 ## Features
 

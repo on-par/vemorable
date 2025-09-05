@@ -94,7 +94,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="flex flex-col h-full">
           {/* Logo/Brand */}
           <div className="flex items-center justify-between h-16 px-6 border-b">
-            <h2 className="text-xl font-bold text-gray-900">VemoRable</h2>
+            <h2 className="text-xl font-bold text-gray-900">VeMorable</h2>
             <button
               onClick={() => setIsSidebarOpen(false)}
               className="p-1 rounded-md hover:bg-gray-100 lg:hidden"

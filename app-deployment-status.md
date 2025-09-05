@@ -1,4 +1,4 @@
-# VemoRable App Deployment Status Report
+# VeMorable App Deployment Status Report
 
 **Date**: January 9, 2025  
 **Environment**: Production (https://vemorable.vercel.app)  
@@ -6,7 +6,7 @@
 
 ## Executive Summary
 
-The VemoRable application is deployed and partially functional, but has **critical issues** preventing core functionality from working. The landing page loads successfully and authentication via Clerk works, but the main application features are broken due to API authentication failures and missing configuration.
+The VeMorable application is deployed and partially functional, but has **critical issues** preventing core functionality from working. The landing page loads successfully and authentication via Clerk works, but the main application features are broken due to API authentication failures and missing configuration.
 
 ## Critical Issues (P0 - Blocks Core Functionality)
 

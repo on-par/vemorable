@@ -24,7 +24,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
 });
 
 async function setupStorage() {
-  console.log('Setting up Supabase Storage bucket for VemoRable...\n');
+  console.log('Setting up Supabase Storage bucket for VeMorable...\n');
 
   try {
     // Check if bucket already exists

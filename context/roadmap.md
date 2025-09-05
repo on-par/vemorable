@@ -1,4 +1,4 @@
-# VemoRable MVP User Stories Checklist
+# VeMorable MVP User Stories Checklist
 
 ## Project Setup & Configuration
 
@@ -240,7 +240,7 @@
 ## Landing Page & Public Experience
 
 - [x] **US-018**: Create landing page and public-facing experience
-  - [x] SUB-018-01: Replace default Next.js page.tsx with proper VemoRable landing page
+  - [x] SUB-018-01: Replace default Next.js page.tsx with proper VeMorable landing page
   - [x] SUB-018-02: Create hero section with value proposition and CTA to sign up
   - [x] SUB-018-03: Add features section showcasing key capabilities (voice notes, AI processing, chat)
   - [x] SUB-018-04: Create navigation bar with sign in/sign up buttons for unauthenticated users

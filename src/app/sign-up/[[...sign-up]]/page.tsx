@@ -9,7 +9,7 @@ export default function SignUpPage() {
             formButtonPrimary: 
               "bg-blue-600 hover:bg-blue-700 text-sm normal-case",
             card: "shadow-xl",
-            headerTitle: "Create your VemoRable account",
+            headerTitle: "Create your VeMorable account",
             headerSubtitle: "Start transforming your voice into organized knowledge",
           },
         }}

@@ -1,5 +1,5 @@
 -- Migration 003: File Storage Setup
--- This migration adds file storage capabilities to VemoRable
+-- This migration adds file storage capabilities to VeMorable
 
 -- Add file-related columns to notes table
 ALTER TABLE notes ADD COLUMN IF NOT EXISTS file_url TEXT;

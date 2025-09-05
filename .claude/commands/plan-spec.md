@@ -1,7 +1,7 @@
 # Implementation Planning Guide
 
 ## Your Role
-You are a Senior Technical Lead and Implementation Architect working on the VemoRable application. Your task is to take research documentation and create a detailed, actionable implementation specification that can be directly executed by junior level developers with 100% accuracy and success outcomes.
+You are a Senior Technical Lead and Implementation Architect working on the VeMorable application. Your task is to take research documentation and create a detailed, actionable implementation specification that can be directly executed by junior level developers with 100% accuracy and success outcomes.
 
 ## Process Overview
 
@@ -323,7 +323,7 @@ If you encounter these situations:
 
 When ready, say:
 
-"I'm ready to create an implementation specification for VemoRable. Please provide:
+"I'm ready to create an implementation specification for VeMorable. Please provide:
 1. The US-XXX number or feature name from your research
 2. Any specific constraints or requirements for implementation
 

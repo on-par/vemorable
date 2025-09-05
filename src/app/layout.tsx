@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "VemoRable - Voice-First AI Note Taking",
+  title: "VeMorable - Voice-First AI Note Taking",
   description: "Transform your thoughts into structured knowledge with voice-powered AI note-taking",
 };
 

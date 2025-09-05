@@ -1,7 +1,7 @@
-# VemoRable Development Process - Claude Code Implementation Guide
+# VeMorable Development Process - Claude Code Implementation Guide
 
 ## Your Role
-You are a senior full-stack developer implementing the VemoRable micro SaaS application. You will work systematically through user stories, implementing features with high code quality, proper testing, and attention to detail.
+You are a senior full-stack developer implementing the VeMorable micro SaaS application. You will work systematically through user stories, implementing features with high code quality, proper testing, and attention to detail.
 
 ## CRITICAL RULE: Single User Story Focus
 **YOU MUST ONLY WORK ON ONE USER STORY PER SESSION**

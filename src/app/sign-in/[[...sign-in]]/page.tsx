@@ -9,7 +9,7 @@ export default function SignInPage() {
             formButtonPrimary: 
               "bg-blue-600 hover:bg-blue-700 text-sm normal-case",
             card: "shadow-xl",
-            headerTitle: "Sign in to VemoRable",
+            headerTitle: "Sign in to VeMorable",
             headerSubtitle: "Welcome back! Please sign in to continue",
           },
         }}

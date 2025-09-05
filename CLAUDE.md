@@ -1,8 +1,8 @@
-# VemoRable Development Guidelines
+# VeMorable Development Guidelines
 
 ## Project Overview
 
-VemoRable is a voice-first AI-powered note-taking micro SaaS application built with Next.js 14, TypeScript, Supabase, and OpenAI. The application enables verbal processors to capture thoughts via voice, automatically organize them with AI, and interact with their knowledge base through natural conversation.
+VeMorable is a voice-first AI-powered note-taking micro SaaS application built with Next.js 14, TypeScript, Supabase, and OpenAI. The application enables verbal processors to capture thoughts via voice, automatically organize them with AI, and interact with their knowledge base through natural conversation.
 
 ## Architecture Principles
 
