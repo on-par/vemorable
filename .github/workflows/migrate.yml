@@ -97,18 +97,74 @@ jobs:
       
       - name: Check current migration status
         if: env.SKIP_MIGRATIONS == 'false'
+        id: migration_status
         run: |
           echo "Current migration status:"
-          supabase migration list --db-url "$DATABASE_URL"
+          
+          # Get list of applied migrations
+          applied_migrations=$(supabase migration list --db-url "$DATABASE_URL" 2>&1 || echo "")
+          echo "$applied_migrations"
+          
+          # Check if all migrations are already applied
+          pending_count=0
+          for migration_file in supabase/migrations/*.sql; do
+            if [ -f "$migration_file" ]; then
+              migration_name=$(basename "$migration_file")
+              if ! echo "$applied_migrations" | grep -q "$migration_name"; then
+                echo "Pending migration found: $migration_name"
+                pending_count=$((pending_count + 1))
+              fi
+            fi
+          done
+          
+          if [ $pending_count -eq 0 ]; then
+            echo "All migrations are already applied. Skipping migration step."
+            echo "HAS_PENDING_MIGRATIONS=false" >> $GITHUB_ENV
+          else
+            echo "Found $pending_count pending migrations to apply."
+            echo "HAS_PENDING_MIGRATIONS=true" >> $GITHUB_ENV
+          fi
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       
       - name: Run pending migrations
-        if: env.SKIP_MIGRATIONS == 'false'
+        if: env.SKIP_MIGRATIONS == 'false' && env.HAS_PENDING_MIGRATIONS == 'true'
         run: |
-          echo "Applying migrations..."
-          supabase db push --db-url "$DATABASE_URL"
+          echo "Applying pending migrations..."
+          
+          # Try to apply migrations with better error handling
+          if ! supabase db push --db-url "$DATABASE_URL" 2>&1; then
+            echo "Migration push failed. Checking if it's due to already applied migrations..."
+            
+            # Get detailed status
+            migration_output=$(supabase migration list --db-url "$DATABASE_URL" 2>&1)
+            echo "Current database migration state:"
+            echo "$migration_output"
+            
+            # Check if all local migrations exist in the database
+            all_applied=true
+            for migration_file in supabase/migrations/*.sql; do
+              if [ -f "$migration_file" ]; then
+                migration_name=$(basename "$migration_file")
+                if ! echo "$migration_output" | grep -q "$migration_name"; then
+                  all_applied=false
+                  echo "ERROR: Migration $migration_name is not applied but push failed!"
+                  exit 1
+                fi
+              fi
+            done
+            
+            if [ "$all_applied" = true ]; then
+              echo "All migrations are already applied to the database. This is expected."
+              exit 0
+            else
+              echo "Migration push failed for unknown reasons."
+              exit 1
+            fi
+          else
+            echo "Migrations applied successfully."
+          fi
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
