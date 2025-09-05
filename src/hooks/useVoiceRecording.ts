@@ -56,6 +56,7 @@ export const useVoiceRecording = (
       stream.getTracks().forEach(track => track.stop());
       
       setIsPermissionGranted(true);
+      setError(null); // Clear any previous permission errors
       return true;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to get microphone permission';
@@ -96,6 +97,8 @@ export const useVoiceRecording = (
   const startRecording = useCallback(async () => {
     try {
       setError(null);
+      // Reset any previous audio blob
+      setAudioBlob(null);
       
       // Request permission if not already granted
       if (!isPermissionGranted) {

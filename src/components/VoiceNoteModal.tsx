@@ -68,7 +68,8 @@ export default function VoiceNoteModal({ isOpen, onClose, onNoteCreated }: Voice
         throw new Error('Failed to transcribe audio');
       }
 
-      const { text: transcript } = await transcribeResponse.json();
+      const transcribeData = await transcribeResponse.json();
+      const transcript = transcribeData.data?.text || transcribeData.text;
 
       if (!transcript) {
         throw new Error('No transcription received');
@@ -214,7 +215,7 @@ export default function VoiceNoteModal({ isOpen, onClose, onNoteCreated }: Voice
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Modal Header */}
         <div className="sticky top-0 bg-white border-b px-6 py-4">
