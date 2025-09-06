@@ -29,8 +29,8 @@ export async function POST(request: NextRequest) {
 
     return successResponse({
       userId,
-      originalTranscript: validatedData.transcript,
-      processedContent: processedNote.cleanedTranscript,
+      original_transcript: validatedData.transcript,
+      processed_content: processedNote.cleanedTranscript,
       title: processedNote.title,
       summary: processedNote.summary,
       tags: processedNote.tags,

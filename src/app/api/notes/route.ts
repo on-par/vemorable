@@ -89,6 +89,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const notesService = await createNotesService()
     
     const body = await request.json()
+    
+    // Enhanced logging for debugging
+    console.log('POST /api/notes - Request body:', JSON.stringify(body, null, 2))
+    
     const validatedData = createNoteSchema.parse(body)
     
     const noteData = {
@@ -103,7 +107,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       data: note
     }, { status: 201 })
   } catch (error) {
-    console.error('POST /api/notes error:', error)
+    // Enhanced error logging with request details
+    console.error('POST /api/notes error:', {
+      error,
+      errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      errorName: error && typeof error === 'object' && 'name' in error ? error.name : 'Unknown',
+      stack: error instanceof Error ? error.stack : undefined
+    })
     
     if (error instanceof ApiError) {
       return NextResponse.json(
@@ -119,15 +129,25 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       )
     }
 
-    // Handle Zod validation errors
+    // Handle Zod validation errors with detailed field information
     if (error && typeof error === 'object' && 'name' in error && error.name === 'ZodError') {
+      const zodError = error as unknown as { errors: Array<{ path: string[]; message: string; code: string }> };
+      const fieldErrors = zodError.errors?.map((err) => ({
+        field: err.path.join('.'),
+        message: err.message,
+        code: err.code
+      })) || [];
+      
       return NextResponse.json(
         {
           success: false,
           error: {
-            message: 'Validation failed',
+            message: `Validation failed: ${fieldErrors.map((e) => `${e.field} - ${e.message}`).join(', ')}`,
             code: 'VALIDATION_ERROR',
-            details: error,
+            details: { 
+              fields: fieldErrors,
+              originalError: error 
+            },
           },
         },
         { status: 400 }
