@@ -17,6 +17,9 @@ function isServerTestEnvironment(): boolean {
 function isClientTestEnvironment(): boolean {
   if (typeof window === 'undefined') return false;
   
+  // Check for explicit test flag first
+  if ((window as any).__PLAYWRIGHT_TEST__) return true;
+  
   return (
     window.location.hostname === 'localhost' && 
     (window.navigator.userAgent.includes('playwright') || 

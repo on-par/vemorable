@@ -108,6 +108,7 @@ jobs:
         env:
           # Note: E2E tests use mocking, so we provide minimal env vars
           NODE_ENV: test
+          PLAYWRIGHT_TEST: true
         run: npm run test:e2e
       
       # Upload test results and artifacts

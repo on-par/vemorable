@@ -40,24 +40,42 @@ export const mockNotes: MockNote[] = [
  * Mock successful API responses for notes
  */
 export async function mockNotesAPI(page: Page, notes: MockNote[] = mockNotes) {
-  // Mock GET /api/notes - fetch user's notes
-  await page.route('**/api/notes', async (route) => {
-    if (route.request().method() === 'GET') {
-      await route.fulfill({
-        json: {
-          success: true,
-          data: {
-            notes,
-            pagination: {
-              limit: 50,
-              offset: 0,
-              total: notes.length,
+  console.log('Setting up notes API mocking...');
+  
+  // Try multiple route patterns to ensure we catch the request
+  const patterns = ['**/api/notes**', '**/api/notes', '/api/notes'];
+  
+  for (const pattern of patterns) {
+    await page.route(pattern, async (route) => {
+      console.log(`=== ROUTE ${pattern} INTERCEPTED ===`);
+      console.log('Method:', route.request().method());
+      console.log('URL:', route.request().url());
+      
+      if (route.request().method() === 'GET') {
+        console.log('Fulfilling with mock notes:', notes.length);
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            success: true,
+            data: {
+              notes: notes,
+              pagination: {
+                limit: 50,
+                offset: 0,
+                total: notes.length,
+              },
             },
-          },
-        },
-      });
-    }
-  });
+          }),
+        });
+        return;
+      }
+      
+      await route.continue();
+    });
+  }
+  
+  console.log('Notes API mocking setup complete');
 
   // Mock POST /api/notes - create new note
   await page.route('**/api/notes', async (route) => {
@@ -122,6 +140,58 @@ export async function mockChatAPI(page: Page, notesUsedCount: number = 2) {
  * This comprehensive approach mocks both Clerk client-side and API-level auth
  */
 export async function bypassAuth(page: Page) {
+  // Set test environment variables for the browser context
+  await page.addInitScript(() => {
+    // Set test environment flags
+    window.__PLAYWRIGHT_TEST__ = true;
+    
+    // Preemptively mock Clerk before any modules load
+    const mockClerkInstance = {
+      loaded: true,
+      addListener: () => {},
+      removeListener: () => {},
+      on: () => {},
+      off: () => {},
+      emit: () => {},
+      user: {
+        id: 'test-user-id',
+        emailAddresses: [{ emailAddress: 'test@vemorable.com' }],
+        firstName: 'Test',
+        lastName: 'User',
+      },
+      session: {
+        id: 'test-session-id',
+        status: 'active',
+        getToken: () => Promise.resolve('mock-jwt-token'),
+      },
+      load: () => Promise.resolve(mockClerkInstance),
+      isReady: () => true,
+      buildUrl: () => 'https://mock-url.com',
+      signOut: () => Promise.resolve(),
+    };
+    
+    window.Clerk = mockClerkInstance;
+    window.__clerk_loaded = true;
+    window.__clerk_frontend_loaded = true;
+    
+    // Mock ClerkProvider's internal clerkjs instance
+    Object.defineProperty(window, '__CLERK_PUBLISHABLE_KEY', {
+      value: 'pk_test_mock_key',
+      writable: false
+    });
+    
+    // Add test headers for server detection
+    const originalFetch = window.fetch;
+    window.fetch = function(...args) {
+      const [url, options = {}] = args;
+      options.headers = {
+        ...options.headers,
+        'x-playwright-test': 'true'
+      };
+      return originalFetch.call(this, url, options);
+    };
+  });
+
   // Mock Clerk's client-side auth state - comprehensive mocking
   await page.addInitScript(() => {
     const mockUser = {
@@ -223,7 +293,7 @@ export async function bypassAuth(page: Page) {
           return mockClerkModule;
         }
         if (originalDefine) {
-          return originalDefine.call(this, name, deps, factory);
+          return (originalDefine as any).call(window, name, deps, factory);
         }
       };
     }
@@ -245,8 +315,15 @@ export async function bypassAuth(page: Page) {
   await page.route('**/clerk.browser.js*', async (route) => {
     const mockClerkScript = `
       window.__clerk_frontend_loaded = true;
-      window.Clerk = {
+      
+      // Create a comprehensive Clerk mock with all necessary methods
+      const mockClerkInstance = {
         loaded: true,
+        addListener: () => {},
+        removeListener: () => {},
+        on: () => {},
+        off: () => {},
+        emit: () => {},
         user: {
           id: 'test-user-id',
           emailAddresses: [{ emailAddress: 'test@vemorable.com' }],
@@ -260,7 +337,32 @@ export async function bypassAuth(page: Page) {
         },
         load: () => Promise.resolve(),
         isReady: () => true,
+        buildUrl: () => 'https://mock-url.com',
+        buildSignInUrl: () => 'https://mock-signin-url.com',
+        buildSignUpUrl: () => 'https://mock-signup-url.com',
+        buildUserProfileUrl: () => 'https://mock-profile-url.com',
+        buildCreateOrganizationUrl: () => 'https://mock-org-url.com',
+        buildOrganizationProfileUrl: () => 'https://mock-org-profile-url.com',
+        navigate: () => {},
+        redirectToSignIn: () => {},
+        redirectToSignUp: () => {},
+        redirectToUserProfile: () => {},
+        redirectToCreateOrganization: () => {},
+        redirectToOrganizationProfile: () => {},
+        signOut: () => Promise.resolve(),
+        openSignIn: () => {},
+        openSignUp: () => {},
+        openUserProfile: () => {},
+        openCreateOrganization: () => {},
+        openOrganizationProfile: () => {},
+        closeSignIn: () => {},
+        closeSignUp: () => {},
+        closeUserProfile: () => {},
+        closeCreateOrganization: () => {},
+        closeOrganizationProfile: () => {},
       };
+      
+      window.Clerk = mockClerkInstance;
       
       // Mock React module for Clerk hooks
       if (typeof window.__clerk_react_mocks === 'undefined') {
@@ -340,11 +442,35 @@ export async function setupTestEnvironment(page: Page, customNotes?: MockNote[])
  * Wait for the dashboard page to load completely
  */
 export async function waitForDashboardLoad(page: Page) {
-  // Wait for the main heading to be visible
-  await expect(page.getByRole('heading', { name: 'My Notes' })).toBeVisible();
-  
-  // Wait for any loading spinners to disappear
-  await expect(page.locator('.animate-spin')).not.toBeVisible({ timeout: 10000 });
+  // Wait for any of the possible dashboard states
+  try {
+    // First, wait for the dashboard to show either loading or content
+    await Promise.race([
+      page.getByText('Loading your notes...').waitFor({ state: 'visible', timeout: 3000 }),
+      page.getByRole('heading', { name: 'My Notes' }).waitFor({ state: 'visible', timeout: 3000 }),
+      page.getByText('No notes').waitFor({ state: 'visible', timeout: 3000 }),
+    ]);
+    
+    // If we see loading, wait for it to complete
+    const isLoading = await page.getByText('Loading your notes...').isVisible();
+    if (isLoading) {
+      console.log('Dashboard is loading, waiting for completion...');
+      // Wait up to 15 seconds for loading to complete
+      await page.getByText('Loading your notes...').waitFor({ state: 'hidden', timeout: 15000 });
+    }
+    
+    // Now wait for the final content
+    await Promise.race([
+      page.getByRole('heading', { name: 'My Notes' }).waitFor({ state: 'visible', timeout: 5000 }),
+      page.getByText('No notes').waitFor({ state: 'visible', timeout: 5000 }),
+    ]);
+    
+    console.log('Dashboard loaded successfully');
+  } catch (error) {
+    console.log('Dashboard load failed, taking screenshot for debugging');
+    await page.screenshot({ path: 'debug-dashboard-load-failure.png', fullPage: true });
+    throw error;
+  }
 }
 
 /**

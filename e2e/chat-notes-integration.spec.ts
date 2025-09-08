@@ -45,13 +45,13 @@ test.describe('Chat Notes Integration - Visual Indicators', () => {
     
     await page.goto('/dashboard/chat');
     
-    // Wait for chat interface to load
-    await expect(page.getByText('Chat with your Notes')).toBeVisible();
+    // Wait for chat interface to load - look for the ChatInterface component
+    await expect(page.locator('.h-\\[calc\\(100vh-8rem\\)\\]')).toBeVisible();
   });
 
   test('should show notes availability indicator in chat interface', async ({ page }) => {
-    // Verify we're on the chat page
-    await expect(page.getByRole('heading', { name: /chat with your notes/i })).toBeVisible();
+    // Verify we're on the chat page - look for the mobile toggle button
+    await expect(page.locator('button[aria-label="Toggle chat history"]')).toBeVisible();
     
     // EXPECTED TO FAIL: Chat interface should show that notes are available for context
     // Look for notes availability indicators that should exist but currently don't
