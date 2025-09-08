@@ -1,46 +1,44 @@
-/**
- * @jest-environment node
- */
-import { NotesService, ChatService, SearchService } from '../services'
-import { createServerClient } from '../server'
-import { Note, NoteInsert, ChatSession, ChatMessage, VectorSearchResult } from '../types'
+import { vi } from 'vitest'
+import { NotesService, ChatService, SearchService } from './services'
+import { createServerClient } from './server'
+import { Note, NoteInsert, ChatSession, ChatMessage, VectorSearchResult } from './types'
 
 // Mock the server client
-jest.mock('../server')
-const mockCreateServerClient = createServerClient as jest.MockedFunction<typeof createServerClient>
+vi.mock('./server')
+const mockCreateServerClient = createServerClient as any
 
 // Mock embeddings module
-jest.mock('../../embeddings', () => ({
-  generateNoteEmbedding: jest.fn().mockResolvedValue({
+vi.mock('../../embeddings', () => ({
+  generateNoteEmbedding: vi.fn().mockResolvedValue({
     embedding: [0.1, 0.2, 0.3]
   }),
-  formatEmbeddingForPgVector: jest.fn().mockImplementation((embedding) => 
+  formatEmbeddingForPgVector: vi.fn().mockImplementation((embedding) => 
     `[${embedding.join(',')}]`
   )
 }))
 
 // Create a comprehensive mock Supabase client
 const createMockQuery = () => ({
-  insert: jest.fn().mockReturnThis(),
-  select: jest.fn().mockReturnThis(),
-  single: jest.fn(),
-  update: jest.fn().mockReturnThis(),
-  delete: jest.fn().mockReturnThis(),
-  eq: jest.fn().mockReturnThis(),
-  is: jest.fn().mockReturnThis(),
-  not: jest.fn().mockReturnThis(),
-  or: jest.fn().mockReturnThis(),
-  contains: jest.fn().mockReturnThis(),
-  order: jest.fn().mockReturnThis(),
-  range: jest.fn().mockReturnThis(),
-  ilike: jest.fn().mockReturnThis(),
+  insert: vi.fn().mockReturnThis(),
+  select: vi.fn().mockReturnThis(),
+  single: vi.fn(),
+  update: vi.fn().mockReturnThis(),
+  delete: vi.fn().mockReturnThis(),
+  eq: vi.fn().mockReturnThis(),
+  is: vi.fn().mockReturnThis(),
+  not: vi.fn().mockReturnThis(),
+  or: vi.fn().mockReturnThis(),
+  contains: vi.fn().mockReturnThis(),
+  order: vi.fn().mockReturnThis(),
+  range: vi.fn().mockReturnThis(),
+  ilike: vi.fn().mockReturnThis(),
 })
 
 const mockSupabaseClient = {
-  from: jest.fn().mockImplementation(() => createMockQuery()),
-  rpc: jest.fn(),
+  from: vi.fn().mockImplementation(() => createMockQuery()),
+  rpc: vi.fn(),
   auth: {
-    getUser: jest.fn(),
+    getUser: vi.fn(),
   },
 }
 
@@ -52,7 +50,7 @@ describe('Modern Database Services', () => {
   let searchService: SearchService
   
   beforeEach(async () => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     
     // Reset the mock query functions
     mockSupabaseClient.from.mockClear()
@@ -285,10 +283,10 @@ describe('Modern Database Services', () => {
         const mockQuery = createMockQuery()
         // Create a nested mock for the chaining: delete().eq().eq()
         const mockAfterDelete = {
-          eq: jest.fn().mockReturnThis()
+          eq: vi.fn().mockReturnThis()
         }
         const mockAfterFirstEq = {
-          eq: jest.fn().mockResolvedValue({ data: null, error: null })
+          eq: vi.fn().mockResolvedValue({ data: null, error: null })
         }
         
         mockQuery.delete.mockReturnValue(mockAfterDelete)
@@ -494,10 +492,10 @@ describe('Modern Database Services', () => {
         ]
 
         const mockQuery = {
-          select: jest.fn().mockReturnThis(),
-          eq: jest.fn().mockReturnThis(),
-          order: jest.fn().mockReturnThis(),
-          range: jest.fn().mockResolvedValue({ data: mockMessages, error: null }),
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          order: vi.fn().mockReturnThis(),
+          range: vi.fn().mockResolvedValue({ data: mockMessages, error: null }),
         }
 
         mockSupabaseClient.from.mockReturnValue(mockQuery)

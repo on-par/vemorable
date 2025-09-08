@@ -1,36 +1,34 @@
-/**
- * @jest-environment node
- */
+import { vi } from 'vitest'
 import { 
   getCachedNotes, 
   getCachedNote, 
   invalidateNotesCache, 
   CacheManager,
   QueryCache
-} from '../cache'
-import { createServerClient } from '../server'
-import { Note } from '../types'
+} from './cache'
+import { createServerClient } from './server'
+import { Note } from './types'
 
 // Mock Next.js cache functions
-jest.mock('next/cache', () => ({
-  unstable_cache: jest.fn((fn, keyParts, options) => {
+vi.mock('next/cache', () => ({
+  unstable_cache: vi.fn((fn, keyParts, options) => {
     // Return a function that calls the original function but adds cache simulation
     return async (...args: any[]) => {
       const cacheKey = keyParts.join(':') + ':' + JSON.stringify(args)
       return fn(...args)
     }
   }),
-  revalidateTag: jest.fn(),
-  revalidatePath: jest.fn(),
+  revalidateTag: vi.fn(),
+  revalidatePath: vi.fn(),
 }))
 
 // Mock server client
-jest.mock('../server')
-const mockCreateServerClient = createServerClient as jest.MockedFunction<typeof createServerClient>
+vi.mock('./server')
+const mockCreateServerClient = createServerClient as any
 
 const mockSupabaseClient = {
-  from: jest.fn(),
-  rpc: jest.fn(),
+  from: vi.fn(),
+  rpc: vi.fn(),
 }
 
 mockCreateServerClient.mockResolvedValue(mockSupabaseClient as any)
@@ -40,7 +38,7 @@ describe('Modern Caching Layer', () => {
   let queryCache: QueryCache
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     cacheManager = new CacheManager()
     queryCache = new QueryCache()
   })
@@ -67,15 +65,15 @@ describe('Modern Caching Layer', () => {
       ]
 
       const mockQuery = {
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        is: jest.fn().mockReturnThis(),
-        or: jest.fn().mockReturnThis(),
-        contains: jest.fn().mockReturnThis(),
-        not: jest.fn().mockReturnThis(),
-        order: jest.fn().mockReturnThis(),
-        range: jest.fn().mockResolvedValue({ data: mockNotes, error: null }),
-        limit: jest.fn().mockReturnThis(),
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        is: vi.fn().mockReturnThis(),
+        or: vi.fn().mockReturnThis(),
+        contains: vi.fn().mockReturnThis(),
+        not: vi.fn().mockReturnThis(),
+        order: vi.fn().mockReturnThis(),
+        range: vi.fn().mockResolvedValue({ data: mockNotes, error: null }),
+        limit: vi.fn().mockReturnThis(),
       }
 
       mockSupabaseClient.from.mockReturnValue(mockQuery)
@@ -96,15 +94,15 @@ describe('Modern Caching Layer', () => {
 
     it('should handle cache misses gracefully', async () => {
       const mockQuery = {
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        is: jest.fn().mockReturnThis(),
-        or: jest.fn().mockReturnThis(),
-        contains: jest.fn().mockReturnThis(),
-        not: jest.fn().mockReturnThis(),
-        order: jest.fn().mockReturnThis(),
-        range: jest.fn().mockResolvedValue({ data: [], error: null }),
-        limit: jest.fn().mockReturnThis(),
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        is: vi.fn().mockReturnThis(),
+        or: vi.fn().mockReturnThis(),
+        contains: vi.fn().mockReturnThis(),
+        not: vi.fn().mockReturnThis(),
+        order: vi.fn().mockReturnThis(),
+        range: vi.fn().mockResolvedValue({ data: [], error: null }),
+        limit: vi.fn().mockReturnThis(),
       }
 
       mockSupabaseClient.from.mockReturnValue(mockQuery)
@@ -117,15 +115,15 @@ describe('Modern Caching Layer', () => {
 
     it('should respect different cache keys for different users', async () => {
       const mockQuery = {
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        is: jest.fn().mockReturnThis(),
-        or: jest.fn().mockReturnThis(),
-        contains: jest.fn().mockReturnThis(),
-        not: jest.fn().mockReturnThis(),
-        order: jest.fn().mockReturnThis(),
-        range: jest.fn().mockResolvedValue({ data: [], error: null }),
-        limit: jest.fn().mockReturnThis(),
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        is: vi.fn().mockReturnThis(),
+        or: vi.fn().mockReturnThis(),
+        contains: vi.fn().mockReturnThis(),
+        not: vi.fn().mockReturnThis(),
+        order: vi.fn().mockReturnThis(),
+        range: vi.fn().mockResolvedValue({ data: [], error: null }),
+        limit: vi.fn().mockReturnThis(),
       }
 
       mockSupabaseClient.from.mockReturnValue(mockQuery)
@@ -158,10 +156,10 @@ describe('Modern Caching Layer', () => {
       }
 
       const mockQuery = {
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        is: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({ data: mockNote, error: null }),
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        is: vi.fn().mockReturnThis(),
+        single: vi.fn().mockResolvedValue({ data: mockNote, error: null }),
       }
 
       mockSupabaseClient.from.mockReturnValue(mockQuery)
@@ -175,10 +173,10 @@ describe('Modern Caching Layer', () => {
 
     it('should return null for non-existent notes', async () => {
       const mockQuery = {
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        is: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({ data: null, error: null }),
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        is: vi.fn().mockReturnThis(),
+        single: vi.fn().mockResolvedValue({ data: null, error: null }),
       }
 
       mockSupabaseClient.from.mockReturnValue(mockQuery)
@@ -191,7 +189,7 @@ describe('Modern Caching Layer', () => {
 
   describe('Cache Invalidation', () => {
     it('should invalidate notes cache on user action', async () => {
-      const { revalidateTag } = require('next/cache')
+      const { revalidateTag } = await import('next/cache')
 
       await invalidateNotesCache('test-user')
 
@@ -199,7 +197,7 @@ describe('Modern Caching Layer', () => {
     })
 
     it('should invalidate specific note cache', async () => {
-      const { revalidateTag } = require('next/cache')
+      const { revalidateTag } = await import('next/cache')
 
       await invalidateNotesCache('test-user', 'note-1')
 
@@ -208,7 +206,7 @@ describe('Modern Caching Layer', () => {
     })
 
     it('should invalidate all related caches on note update', async () => {
-      const { revalidateTag } = require('next/cache')
+      const { revalidateTag } = await import('next/cache')
 
       await invalidateNotesCache('test-user', 'note-1', {
         invalidateSearch: true,
@@ -298,7 +296,7 @@ describe('Modern Caching Layer', () => {
     })
 
     it('should generate different cache keys for different parameters', async () => {
-      const testQuery = jest.fn().mockImplementation(async (userId: string) => {
+      const testQuery = vi.fn().mockImplementation(async (userId: string) => {
         return [{ id: userId, title: 'Test' }]
       })
 
@@ -335,7 +333,7 @@ describe('Modern Caching Layer', () => {
 
   describe('Performance Optimizations', () => {
     it('should batch similar queries', async () => {
-      const batchQuery = jest.fn().mockResolvedValue([
+      const batchQuery = vi.fn().mockResolvedValue([
         { id: '1', title: 'Note 1' },
         { id: '2', title: 'Note 2' },
         { id: '1,2', title: 'Combined' },
@@ -361,7 +359,7 @@ describe('Modern Caching Layer', () => {
     })
 
     it('should prefetch commonly accessed data', async () => {
-      const prefetchQuery = jest.fn().mockResolvedValue([{ id: '1' }])
+      const prefetchQuery = vi.fn().mockResolvedValue([{ id: '1' }])
       
       // Set up prefetching for user notes
       const prefetcher = queryCache.prefetch(prefetchQuery, 'user-notes', {

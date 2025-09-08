@@ -1,8 +1,6 @@
-/**
- * @jest-environment jsdom
- */
-import { createClient } from '../client'
-import { resetEnvironmentCache } from '../config'
+import { vi } from 'vitest'
+import { createClient } from './client'
+import { resetEnvironmentCache } from './config'
 import { Database } from '@/types/database'
 
 // Mock environment variables
@@ -19,7 +17,7 @@ Object.defineProperty(process, 'env', {
 describe('Modern Supabase Browser Client', () => {
   beforeEach(() => {
     // Reset mocks and environment cache
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     resetEnvironmentCache()
     
     // Restore environment variables

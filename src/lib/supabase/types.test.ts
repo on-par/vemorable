@@ -1,4 +1,4 @@
-import { Tables, TablesInsert, TablesUpdate, Database } from '../types'
+import { Tables, TablesInsert, TablesUpdate, Database } from './types'
 
 // Mock the database types for testing
 type MockDatabase = {

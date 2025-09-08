@@ -1,19 +1,17 @@
-/**
- * @jest-environment node
- */
-import { createServerClient } from '../server'
-import { validateEnvironment, resetEnvironmentCache } from '../config'
+import { vi } from 'vitest'
+import { createServerClient } from './server'
+import { validateEnvironment, resetEnvironmentCache } from './config'
 
 // Mock Next.js cookies
 const mockCookies = {
-  getAll: jest.fn(() => [
+  getAll: vi.fn(() => [
     { name: 'sb-test-auth-token', value: 'mock-token' }
   ]),
-  set: jest.fn(),
+  set: vi.fn(),
 }
 
-jest.mock('next/headers', () => ({
-  cookies: jest.fn(() => Promise.resolve(mockCookies))
+vi.mock('next/headers', () => ({
+  cookies: vi.fn(() => Promise.resolve(mockCookies))
 }))
 
 // Mock environment variables
@@ -29,7 +27,7 @@ Object.defineProperty(process, 'env', {
 
 describe('Modern Supabase Server Client', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     resetEnvironmentCache()
     mockCookies.getAll.mockClear()
     mockCookies.set.mockClear()

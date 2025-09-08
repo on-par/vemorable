@@ -1,3 +1,4 @@
+import { vi } from 'vitest'
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -5,10 +6,10 @@ import { VoiceRecorder } from './VoiceRecorder'
 import { useVoiceRecording } from '@/hooks/useVoiceRecording'
 
 // Mock the useVoiceRecording hook
-jest.mock('@/hooks/useVoiceRecording')
+vi.mock('@/hooks/useVoiceRecording')
 
 describe('VoiceRecorder', () => {
-  const mockUseVoiceRecording = useVoiceRecording as jest.MockedFunction<typeof useVoiceRecording>
+  const mockUseVoiceRecording = useVoiceRecording as any
   
   const defaultMockReturn = {
     isRecording: false,
@@ -16,23 +17,23 @@ describe('VoiceRecorder', () => {
     recordingTime: 0,
     audioBlob: null,
     error: null,
-    startRecording: jest.fn(),
-    stopRecording: jest.fn(),
-    resetRecording: jest.fn(),
-    requestPermission: jest.fn(),
+    startRecording: vi.fn(),
+    stopRecording: vi.fn(),
+    resetRecording: vi.fn(),
+    requestPermission: vi.fn(),
   }
 
   beforeEach(() => {
     // Reset mock before each test
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     mockUseVoiceRecording.mockReturnValue(defaultMockReturn)
     
     // Mock URL.createObjectURL
-    global.URL.createObjectURL = jest.fn(() => 'blob:mock-url')
+    global.URL.createObjectURL = vi.fn(() => 'blob:mock-url')
   })
 
   afterEach(() => {
-    jest.resetAllMocks()
+    vi.resetAllMocks()
   })
 
   describe('Initial State', () => {
@@ -87,7 +88,7 @@ describe('VoiceRecorder', () => {
     })
 
     it('should call startRecording when start button is clicked', async () => {
-      const startRecordingMock = jest.fn()
+      const startRecordingMock = vi.fn()
       mockUseVoiceRecording.mockReturnValue({
         ...defaultMockReturn,
         startRecording: startRecordingMock,
@@ -102,7 +103,7 @@ describe('VoiceRecorder', () => {
     })
 
     it('should call stopRecording when stop button is clicked', async () => {
-      const stopRecordingMock = jest.fn()
+      const stopRecordingMock = vi.fn()
       mockUseVoiceRecording.mockReturnValue({
         ...defaultMockReturn,
         isRecording: true,
@@ -146,7 +147,7 @@ describe('VoiceRecorder', () => {
     })
 
     it('should call resetRecording when reset button is clicked', async () => {
-      const resetRecordingMock = jest.fn()
+      const resetRecordingMock = vi.fn()
       const mockBlob = new Blob(['audio'], { type: 'audio/webm' })
       mockUseVoiceRecording.mockReturnValue({
         ...defaultMockReturn,
@@ -163,7 +164,7 @@ describe('VoiceRecorder', () => {
     })
 
     it('should call onRecordingComplete callback when recording completes', () => {
-      const onRecordingComplete = jest.fn()
+      const onRecordingComplete = vi.fn()
       const mockBlob = new Blob(['audio'], { type: 'audio/webm' })
       
       const { rerender } = render(<VoiceRecorder onRecordingComplete={onRecordingComplete} />)
@@ -201,7 +202,7 @@ describe('VoiceRecorder', () => {
     })
 
     it('should call requestPermission when grant permission button is clicked', async () => {
-      const requestPermissionMock = jest.fn()
+      const requestPermissionMock = vi.fn()
       mockUseVoiceRecording.mockReturnValue({
         ...defaultMockReturn,
         isPermissionGranted: false,
@@ -249,7 +250,7 @@ describe('VoiceRecorder', () => {
     })
 
     it('should call onError callback when error occurs', () => {
-      const onError = jest.fn()
+      const onError = vi.fn()
       const errorMessage = 'Recording failed'
       
       mockUseVoiceRecording.mockReturnValue({

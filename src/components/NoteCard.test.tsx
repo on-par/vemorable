@@ -1,10 +1,11 @@
+import { vi } from 'vitest'
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import NoteCard from './NoteCard'
 
 // Mock fetch for delete operations
-global.fetch = jest.fn()
+global.fetch = vi.fn()
 
 describe('NoteCard', () => {
   const mockNote = {
@@ -17,15 +18,15 @@ describe('NoteCard', () => {
   }
 
   const mockHandlers = {
-    onDelete: jest.fn(),
-    onEdit: jest.fn(),
-    onFavorite: jest.fn(),
-    onClick: jest.fn(),
+    onDelete: vi.fn(),
+    onEdit: vi.fn(),
+    onFavorite: vi.fn(),
+    onClick: vi.fn(),
   }
 
   beforeEach(() => {
-    jest.clearAllMocks()
-    ;(global.fetch as jest.Mock).mockClear()
+    vi.clearAllMocks()
+    ;(global.fetch as ReturnType<typeof vi.fn>).mockClear()
   })
 
   describe('Rendering', () => {
@@ -268,7 +269,7 @@ describe('NoteCard', () => {
     })
 
     it('should call API and onDelete when confirmed', async () => {
-      ;(global.fetch as jest.Mock).mockResolvedValueOnce({
+      ;(global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
         ok: true,
         json: async () => ({ success: true }),
       })
@@ -293,8 +294,8 @@ describe('NoteCard', () => {
     })
 
     it('should handle delete API error gracefully', async () => {
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation()
-      ;(global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'))
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation()
+      ;(global.fetch as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error('Network error'))
       
       render(<NoteCard note={mockNote} {...mockHandlers} />)
       
@@ -316,7 +317,7 @@ describe('NoteCard', () => {
     })
 
     it('should not call onDelete if API returns non-ok response', async () => {
-      ;(global.fetch as jest.Mock).mockResolvedValueOnce({
+      ;(global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
         ok: false,
         status: 404,
       })

@@ -1,20 +1,21 @@
+import { vi } from 'vitest'
 import { POST } from './transcribe/route'
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { getAuthenticatedUserId, successResponse, errorResponse, handleApiError } from '@/lib/api-utils'
 
 // Mock dependencies
-jest.mock('@/lib/api-utils', () => ({
-  getAuthenticatedUserId: jest.fn(),
-  successResponse: jest.fn(),
-  errorResponse: jest.fn(),
-  handleApiError: jest.fn(),
+vi.mock('@/lib/api-utils', () => ({
+  getAuthenticatedUserId: vi.fn(),
+  successResponse: vi.fn(),
+  errorResponse: vi.fn(),
+  handleApiError: vi.fn(),
 }))
 
 // Create a shared mock that can be accessed from tests
-let mockTranscriptionsCreate = jest.fn()
+let mockTranscriptionsCreate = vi.fn()
 
-jest.mock('openai', () => {
+vi.mock('openai', () => {
   // Mock OpenAI.APIError class
   class MockAPIError extends Error {
     public status: number
@@ -32,7 +33,7 @@ jest.mock('openai', () => {
     }
   }
 
-  const MockedOpenAI = jest.fn().mockImplementation(() => ({
+  const MockedOpenAI = vi.fn().mockImplementation(() => ({
     audio: {
       transcriptions: {
         create: (...args: any[]) => mockTranscriptionsCreate(...args),
@@ -47,18 +48,18 @@ describe('/api/transcribe', () => {
   const mockUserId = 'user-123'
   
   beforeEach(() => {
-    jest.clearAllMocks()
-    mockTranscriptionsCreate = jest.fn()
-    ;(getAuthenticatedUserId as jest.Mock).mockResolvedValue(mockUserId)
+    vi.clearAllMocks()
+    mockTranscriptionsCreate = vi.fn()
+    ;(getAuthenticatedUserId as ReturnType<typeof vi.fn>).mockResolvedValue(mockUserId)
     
     // Mock api-utils functions
-    ;(successResponse as jest.Mock).mockImplementation((data, status = 200) => 
+    ;(successResponse as ReturnType<typeof vi.fn>).mockImplementation((data, status = 200) => 
       NextResponse.json({ success: true, data }, { status })
     )
-    ;(errorResponse as jest.Mock).mockImplementation((message, code, status = 400) => 
+    ;(errorResponse as ReturnType<typeof vi.fn>).mockImplementation((message, code, status = 400) => 
       NextResponse.json({ success: false, error: { message, code } }, { status })
     )
-    ;(handleApiError as jest.Mock).mockImplementation((error) => {
+    ;(handleApiError as ReturnType<typeof vi.fn>).mockImplementation((error) => {
       console.log('handleApiError called with:', error)
       return NextResponse.json({ success: false, error: { message: 'Internal server error', code: 'INTERNAL_ERROR' } }, { status: 500 })
     })
@@ -87,7 +88,7 @@ describe('/api/transcribe', () => {
     const file = new File([buffer], name, { type })
     
     // Mock the arrayBuffer method that the POST function expects
-    ;(file as any).arrayBuffer = jest.fn().mockResolvedValue(buffer)
+    ;(file as any).arrayBuffer = vi.fn().mockResolvedValue(buffer)
     
     return file
   }
@@ -260,7 +261,7 @@ describe('/api/transcribe', () => {
 
   describe('Authentication and Configuration', () => {
     it('should reject unauthenticated requests', async () => {
-      ;(getAuthenticatedUserId as jest.Mock).mockRejectedValue(
+      ;(getAuthenticatedUserId as ReturnType<typeof vi.fn>).mockRejectedValue(
         new Error('Unauthorized')
       )
       

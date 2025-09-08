@@ -1,3 +1,4 @@
+import { vi } from 'vitest'
 import { GET, POST } from './notes/route'
 import { NextRequest } from 'next/server'
 import { getAuthenticatedUserId } from '@/lib/api/auth'
@@ -6,22 +7,29 @@ import { generateNoteEmbedding, formatEmbeddingForPgVector } from '@/lib/embeddi
 import { ApiError } from '@/lib/supabase/types'
 
 // Mock dependencies
-jest.mock('@/lib/api/auth')
-jest.mock('@/lib/supabase/services')
-jest.mock('@/lib/embeddings')
-jest.mock('@/lib/validations')
+vi.mock('@/lib/api/auth')
+vi.mock('@/lib/supabase/services')
+vi.mock('@/lib/embeddings')
+vi.mock('@/lib/validations', () => ({
+  createNoteSchema: {
+    parse: vi.fn()
+  }
+}))
+
+// Import the mocked module for type safety
+import { createNoteSchema } from '@/lib/validations'
 
 describe('/api/notes', () => {
   const mockUserId = 'user-123'
   const mockNotesService = {
-    getNotes: jest.fn(),
-    createNote: jest.fn(),
+    getNotes: vi.fn(),
+    createNote: vi.fn(),
   }
   
   beforeEach(() => {
-    jest.clearAllMocks()
-    ;(getAuthenticatedUserId as jest.Mock).mockResolvedValue(mockUserId)
-    ;(createNotesService as jest.Mock).mockResolvedValue(mockNotesService)
+    vi.clearAllMocks()
+    ;(getAuthenticatedUserId as ReturnType<typeof vi.fn>).mockResolvedValue(mockUserId)
+    ;(createNotesService as ReturnType<typeof vi.fn>).mockResolvedValue(mockNotesService)
   })
 
   describe('GET /api/notes', () => {
@@ -184,7 +192,7 @@ describe('/api/notes', () => {
     })
 
     it('should handle authentication errors', async () => {
-      ;(getAuthenticatedUserId as jest.Mock).mockRejectedValue(
+      ;(getAuthenticatedUserId as ReturnType<typeof vi.fn>).mockRejectedValue(
         new ApiError('Unauthorized', 401, 'UNAUTHORIZED')
       )
 
@@ -222,8 +230,7 @@ describe('/api/notes', () => {
       mockNotesService.createNote.mockResolvedValue(createdNote)
 
       // Mock validation schema
-      const { createNoteSchema } = require('@/lib/validations')
-      createNoteSchema.parse = jest.fn().mockReturnValue(noteData)
+      ;(createNoteSchema.parse as ReturnType<typeof vi.fn>).mockReturnValue(noteData)
 
       const request = createMockRequest(noteData)
       const response = await POST(request)
@@ -250,8 +257,7 @@ describe('/api/notes', () => {
       mockNotesService.createNote.mockResolvedValue(createdNote)
 
       // Mock validation schema
-      const { createNoteSchema } = require('@/lib/validations')
-      createNoteSchema.parse = jest.fn().mockReturnValue(noteData)
+      ;(createNoteSchema.parse as ReturnType<typeof vi.fn>).mockReturnValue(noteData)
 
       const request = createMockRequest(noteData)
       const response = await POST(request)
@@ -269,10 +275,9 @@ describe('/api/notes', () => {
       }
 
       // Mock validation schema to throw ZodError
-      const { createNoteSchema } = require('@/lib/validations')
       const zodError = new Error('Validation failed')
       zodError.name = 'ZodError'
-      createNoteSchema.parse = jest.fn().mockImplementation(() => {
+      ;(createNoteSchema.parse as ReturnType<typeof vi.fn>).mockImplementation(() => {
         throw zodError
       })
 
@@ -298,8 +303,7 @@ describe('/api/notes', () => {
       )
 
       // Mock validation schema
-      const { createNoteSchema } = require('@/lib/validations')
-      createNoteSchema.parse = jest.fn().mockReturnValue(noteData)
+      ;(createNoteSchema.parse as ReturnType<typeof vi.fn>).mockReturnValue(noteData)
 
       const request = createMockRequest(noteData)
       const response = await POST(request)
@@ -311,7 +315,7 @@ describe('/api/notes', () => {
     })
 
     it('should handle authentication errors', async () => {
-      ;(getAuthenticatedUserId as jest.Mock).mockRejectedValue(
+      ;(getAuthenticatedUserId as ReturnType<typeof vi.fn>).mockRejectedValue(
         new ApiError('Unauthorized', 401, 'UNAUTHORIZED')
       )
 

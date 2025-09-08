@@ -1,48 +1,46 @@
-/**
- * @jest-environment node
- */
+import { vi } from 'vitest'
 import { createNotesService, createSearchService, createChatService } from '../../supabase/services'
 import { modernizeApiRoutes, ApiRouteFactory } from '../factory'
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedUserId } from '../auth'
 
 // Mock the services
-jest.mock('../../supabase/services')
-jest.mock('../auth')
-jest.mock('../../embeddings')
+vi.mock('../../supabase/services')
+vi.mock('../auth')
+vi.mock('../../embeddings')
 
-const mockCreateNotesService = createNotesService as jest.MockedFunction<typeof createNotesService>
-const mockCreateSearchService = createSearchService as jest.MockedFunction<typeof createSearchService>
-const mockCreateChatService = createChatService as jest.MockedFunction<typeof createChatService>
-const mockGetAuthenticatedUserId = getAuthenticatedUserId as jest.MockedFunction<typeof getAuthenticatedUserId>
+const mockCreateNotesService = createNotesService as any
+const mockCreateSearchService = createSearchService as any
+const mockCreateChatService = createChatService as any
+const mockGetAuthenticatedUserId = getAuthenticatedUserId as any
 
 // Mock embeddings
 const { generateQueryEmbedding } = require('../../embeddings')
-const mockGenerateQueryEmbedding = generateQueryEmbedding as jest.MockedFunction<typeof generateQueryEmbedding>
+const mockGenerateQueryEmbedding = generateQueryEmbedding as any
 
 // Mock services
 const mockNotesService = {
-  createNote: jest.fn(),
-  getNotes: jest.fn(),
-  getNote: jest.fn(),
-  updateNote: jest.fn(),
-  deleteNote: jest.fn(),
-  getUserTags: jest.fn(),
+  createNote: vi.fn(),
+  getNotes: vi.fn(),
+  getNote: vi.fn(),
+  updateNote: vi.fn(),
+  deleteNote: vi.fn(),
+  getUserTags: vi.fn(),
 }
 
 const mockSearchService = {
-  semanticSearch: jest.fn(),
-  hybridSearch: jest.fn(),
-  keywordSearch: jest.fn(),
+  semanticSearch: vi.fn(),
+  hybridSearch: vi.fn(),
+  keywordSearch: vi.fn(),
 }
 
 const mockChatService = {
-  createSession: jest.fn(),
-  getUserSessions: jest.fn(),
-  addMessage: jest.fn(),
-  getSessionHistory: jest.fn(),
-  updateSessionTitle: jest.fn(),
-  deleteSession: jest.fn(),
+  createSession: vi.fn(),
+  getUserSessions: vi.fn(),
+  addMessage: vi.fn(),
+  getSessionHistory: vi.fn(),
+  updateSessionTitle: vi.fn(),
+  deleteSession: vi.fn(),
 }
 
 mockCreateNotesService.mockResolvedValue(mockNotesService as any)
@@ -58,7 +56,7 @@ mockGenerateQueryEmbedding.mockResolvedValue({
 
 describe('Modern API Route Architecture', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   describe('ApiRouteFactory', () => {

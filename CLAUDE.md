@@ -104,24 +104,37 @@ src/
 2. **Green**: Write minimal code to pass test
 3. **Refactor**: Improve code while keeping tests green
 
-### Testing Hierarchy
+### Testing Framework
+- **Vitest**: Fast, modern testing framework with excellent TypeScript support
+- **Testing Library**: For React component testing
+- **jsdom**: For DOM simulation in tests
+
+### Testing File Organization
+**IMPORTANT**: Tests MUST be placed side-by-side with the files they test, NOT in separate `__tests__` or `__mocks__` folders.
+
 ```
 src/features/voice-notes/
 ├── components/
 │   ├── VoiceRecorder.tsx
-│   ├── VoiceRecorder.test.tsx
+│   ├── VoiceRecorder.test.tsx      # Test file next to source file
 │   ├── NotesList.tsx
-│   └── NotesList.test.tsx
+│   └── NotesList.test.tsx          # Test file next to source file
 ├── hooks/
 │   ├── useVoiceRecording.ts
-│   └── useVoiceRecording.test.ts
+│   └── useVoiceRecording.test.ts   # Test file next to source file
 ├── utils/
 │   ├── audio.utils.ts
-│   └── audio.utils.test.ts
+│   └── audio.utils.test.ts         # Test file next to source file
 └── api/
     ├── transcribe.ts
-    └── transcribe.test.ts
+    └── transcribe.test.ts           # Test file next to source file
 ```
+
+### Test File Naming Convention
+- Test files MUST use the pattern: `{filename}.test.{ts|tsx}`
+- Test files MUST be in the same directory as the file being tested
+- NEVER create `__tests__` directories
+- NEVER create `__mocks__` directories (use Vitest's vi.mock() inline)
 
 ### Test Categories
 - **Unit Tests**: Individual functions and components in isolation
@@ -129,10 +142,13 @@ src/features/voice-notes/
 - **End-to-End Tests**: Complete user journeys through the application
 
 ### Testing Standards
+- Use Vitest's `vi` for mocking (not Jest)
 - Arrange, Act, Assert pattern
 - Descriptive test names: `should create note when voice recording is transcribed successfully`
 - Mock external dependencies (OpenAI API, Supabase)
 - Test error scenarios, not just happy paths
+- Use `describe` blocks for logical grouping
+- Use `beforeEach` for test setup when needed
 
 ## API Design Principles
 

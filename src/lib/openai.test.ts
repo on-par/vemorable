@@ -1,21 +1,22 @@
+import { vi } from 'vitest'
 import { cleanupTranscript, generateTitleAndSummary, generateTags, processNoteWithAI, openai } from './openai'
 import { generateEmbedding } from './embeddings'
 import OpenAI from 'openai'
 
 // Mock the OpenAI module
-jest.mock('openai')
+vi.mock('openai')
 
 describe('OpenAI Utility Functions', () => {
-  let mockCreate: jest.Mock
-  let mockEmbeddingsCreate: jest.Mock
+  let mockCreate: ReturnType<typeof vi.fn>
+  let mockEmbeddingsCreate: ReturnType<typeof vi.fn>
   
   beforeEach(() => {
     // Reset all mocks before each test
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     
     // Setup the mock for OpenAI
-    mockCreate = jest.fn()
-    mockEmbeddingsCreate = jest.fn()
+    mockCreate = vi.fn()
+    mockEmbeddingsCreate = vi.fn()
     const mockOpenAI = {
       chat: {
         completions: {
@@ -26,7 +27,7 @@ describe('OpenAI Utility Functions', () => {
         create: mockEmbeddingsCreate
       }
     }
-    ;(OpenAI as jest.MockedClass<typeof OpenAI>).mockImplementation(() => mockOpenAI as any)
+    ;(OpenAI as any).mockImplementation(() => mockOpenAI as any)
   })
 
   describe('cleanupTranscript', () => {
