@@ -1,13 +1,20 @@
 import { vi } from 'vitest'
-import { createNotesService, createSearchService, createChatService } from '../../supabase/services'
-import { modernizeApiRoutes, ApiRouteFactory } from '../factory'
+import { createNotesService, createSearchService, createChatService } from '../supabase/services'
+import { modernizeApiRoutes, ApiRouteFactory } from './factory'
 import { NextRequest, NextResponse } from 'next/server'
-import { getAuthenticatedUserId } from '../auth'
+import { getAuthenticatedUserId } from './auth'
+
+// Import the RequestContext type for proper typing
+type RequestContext = {
+  userId?: string
+  validatedData?: unknown
+  params?: Record<string, string>
+}
 
 // Mock the services
-vi.mock('../../supabase/services')
-vi.mock('../auth')
-vi.mock('../../embeddings')
+vi.mock('../supabase/services')
+vi.mock('./auth')
+vi.mock('../embeddings')
 
 const mockCreateNotesService = createNotesService as any
 const mockCreateSearchService = createSearchService as any
@@ -15,7 +22,7 @@ const mockCreateChatService = createChatService as any
 const mockGetAuthenticatedUserId = getAuthenticatedUserId as any
 
 // Mock embeddings
-const { generateQueryEmbedding } = require('../../embeddings')
+const { generateQueryEmbedding } = require('../embeddings')
 const mockGenerateQueryEmbedding = generateQueryEmbedding as any
 
 // Mock services
@@ -88,7 +95,7 @@ describe('Modern API Route Architecture', () => {
       
       const handler = factory
         .withAuth()
-        .createHandler(async (_req: NextRequest, context) => {
+        .createHandler(async (_req: NextRequest, context?: RequestContext) => {
           expect(context?.userId).toBe('test-user-id')
           return { success: true, data: { userId: context?.userId } }
         })

@@ -294,7 +294,7 @@ describe('NoteCard', () => {
     })
 
     it('should handle delete API error gracefully', async () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation()
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
       ;(global.fetch as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error('Network error'))
       
       render(<NoteCard note={mockNote} {...mockHandlers} />)
