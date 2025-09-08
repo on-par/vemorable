@@ -1,26 +1,18 @@
 'use client';
 
 import React, { useState } from 'react';
-
-interface Note {
-  id: string;
-  title: string;
-  summary: string;
-  tags: string[];
-  created_at: string;
-  processed_content: string;
-}
+import type { Note } from '@/features/voice-notes/types/notes.types';
 
 interface NoteCardProps {
   note: Note;
-  onDelete: (noteId: string) => void;
+  onDelete: (noteId: string, noteTitle: string) => void;
   onEdit: (note: Note) => void;
   onFavorite: (noteId: string) => void;
   onClick: (note: Note) => void;
   isFavorited?: boolean;
 }
 
-export default function NoteCard({ 
+const NoteCard = React.memo(function NoteCard({ 
   note, 
   onDelete, 
   onEdit, 
@@ -178,7 +170,7 @@ export default function NoteCard({
                       });
 
                       if (response.ok) {
-                        onDelete(note.id);
+                        onDelete(note.id, note.title);
                       }
                       setShowDeleteConfirm(false);
                     } catch (error) {
@@ -203,4 +195,6 @@ export default function NoteCard({
       </div>
     </div>
   );
-}
+});
+
+export default NoteCard;

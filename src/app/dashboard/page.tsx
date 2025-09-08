@@ -2,26 +2,17 @@
 
 import { useAuth } from '@clerk/nextjs';
 import { redirect } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import DashboardLayout from '@/components/Layout/DashboardLayout';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import NotesList from '@/components/NotesList';
 import VoiceNoteModal from '@/components/VoiceNoteModal';
-
-interface Note {
-  id: string;
-  title: string;
-  summary: string;
-  tags: string[];
-  created_at: string;
-  processed_content: string;
-}
+import { useNotesContext, useNoteOperations } from '@/features/voice-notes/context/NotesContext';
+import type { Note } from '@/features/voice-notes/types/notes.types';
 
 export default function DashboardPage() {
   const { isLoaded, userId } = useAuth();
-  const [notes, setNotes] = useState<Note[]>([]);
+  const { notes, isLoading, error, addNote } = useNotesContext();
+  const { deleteNoteWithConfirmation } = useNoteOperations();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   // Redirect to sign-in if not authenticated
   useEffect(() => {
@@ -30,38 +21,22 @@ export default function DashboardPage() {
     }
   }, [isLoaded, userId]);
 
-  // Fetch user's notes
-  useEffect(() => {
-    async function fetchNotes() {
-      if (!userId) return;
-      
-      try {
-        const response = await fetch('/api/notes');
-        if (!response.ok) {
-          throw new Error('Failed to fetch notes');
-        }
-        const data = await response.json();
-        setNotes(data.data?.notes || []);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load notes');
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    if (userId) {
-      fetchNotes();
-    }
-  }, [userId]);
-
-  const handleNoteCreated = (newNote: Note) => {
-    setNotes(prev => [newNote, ...prev]);
+  const handleNoteCreated = useCallback((newNote: Note) => {
+    addNote(newNote);
     setIsModalOpen(false);
-  };
+  }, [addNote]);
 
-  const handleNoteDeleted = (noteId: string) => {
-    setNotes(prev => prev.filter(note => note.id !== noteId));
-  };
+  const handleNoteDeleted = useCallback(async (noteId: string, noteTitle: string) => {
+    await deleteNoteWithConfirmation(noteId, noteTitle);
+  }, [deleteNoteWithConfirmation]);
+
+  const handleToggleModal = useCallback(() => {
+    setIsModalOpen(prev => !prev);
+  }, []);
+
+  const handleCloseModal = useCallback(() => {
+    setIsModalOpen(false);
+  }, []);
 
   // Show loading state while auth is loading
   if (!isLoaded || !userId) {
@@ -73,8 +48,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <DashboardLayout>
-      <div className="relative min-h-screen">
+    <div className="relative min-h-screen">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">My Notes</h1>
@@ -101,7 +75,7 @@ export default function DashboardPage() {
 
         {/* Floating Action Button */}
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={handleToggleModal}
           className="fixed bottom-8 right-8 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg transition-all duration-200 hover:scale-110"
           aria-label="Create new note"
         >
@@ -124,10 +98,9 @@ export default function DashboardPage() {
         {/* Voice Note Modal */}
         <VoiceNoteModal
           isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          onClose={handleCloseModal}
           onNoteCreated={handleNoteCreated}
         />
       </div>
-    </DashboardLayout>
   );
 }

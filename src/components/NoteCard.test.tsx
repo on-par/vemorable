@@ -289,7 +289,7 @@ describe('NoteCard', () => {
         expect(global.fetch).toHaveBeenCalledWith('/api/notes/note-123', {
           method: 'DELETE',
         })
-        expect(mockHandlers.onDelete).toHaveBeenCalledWith('note-123')
+        expect(mockHandlers.onDelete).toHaveBeenCalledWith('note-123', 'Test Note Title')
       })
     })
 

@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
-import DashboardLayout from '@/components/Layout/DashboardLayout';
 
 export default function SettingsPage() {
   const { userId } = useAuth();
@@ -65,8 +64,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <DashboardLayout>
-      <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto">
         {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
@@ -170,6 +168,5 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
   );
 }

@@ -5,24 +5,15 @@ import NoteCard from './NoteCard';
 import NoteDetail from './NoteDetail';
 import TagFilter from './TagFilter';
 import DateRangePicker from './DateRangePicker';
-
-interface Note {
-  id: string;
-  title: string;
-  summary: string;
-  tags: string[];
-  created_at: string;
-  processed_content: string;
-  raw_transcript?: string;
-}
+import type { Note } from '@/features/voice-notes/types/notes.types';
 
 interface NotesListProps {
   notes: Note[];
-  onNoteDeleted?: (noteId: string) => void;
+  onNoteDeleted?: (noteId: string, noteTitle: string) => void;
   onNoteUpdated?: (note: Note) => void;
 }
 
-export default function NotesList({ notes, onNoteDeleted, onNoteUpdated }: NotesListProps) {
+const NotesList = React.memo(function NotesList({ notes, onNoteDeleted, onNoteUpdated }: NotesListProps) {
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -104,9 +95,9 @@ export default function NotesList({ notes, onNoteDeleted, onNoteUpdated }: Notes
     setSelectedNote(note);
   }, []);
 
-  const handleNoteDelete = useCallback((noteId: string) => {
+  const handleNoteDelete = useCallback((noteId: string, noteTitle: string) => {
     if (onNoteDeleted) {
-      onNoteDeleted(noteId);
+      onNoteDeleted(noteId, noteTitle);
     }
     if (selectedNote?.id === noteId) {
       setSelectedNote(null);
@@ -302,4 +293,6 @@ export default function NotesList({ notes, onNoteDeleted, onNoteUpdated }: Notes
       />
     </>
   );
-}
+});
+
+export default NotesList;

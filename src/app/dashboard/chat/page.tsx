@@ -3,7 +3,6 @@
 import { useAuth } from '@clerk/nextjs';
 import { redirect } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import DashboardLayout from '@/components/Layout/DashboardLayout';
 import ChatInterface from '@/components/ChatInterface';
 
 interface ChatSession {
@@ -103,8 +102,7 @@ export default function ChatPage() {
   }
 
   return (
-    <DashboardLayout>
-      <div className="h-[calc(100vh-8rem)] flex gap-6">
+    <div className="h-[calc(100vh-8rem)] flex gap-6">
         {/* Sessions Sidebar */}
         <div className={`${showSessionsList ? 'block' : 'hidden'} lg:block w-80 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden`}>
           <div className="p-4 border-b border-gray-200">
@@ -181,6 +179,5 @@ export default function ChatPage() {
           />
         </div>
       </div>
-    </DashboardLayout>
   );
 }

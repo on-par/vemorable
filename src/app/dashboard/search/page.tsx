@@ -3,7 +3,6 @@
 import { useAuth } from '@clerk/nextjs';
 import { redirect } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
-import DashboardLayout from '@/components/Layout/DashboardLayout';
 
 interface SearchResult {
   id: string;
@@ -110,8 +109,7 @@ export default function SearchPage() {
   }
 
   return (
-    <DashboardLayout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Search Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Search Notes</h1>
@@ -348,6 +346,5 @@ export default function SearchPage() {
           </div>
         )}
       </div>
-    </DashboardLayout>
   );
 }
