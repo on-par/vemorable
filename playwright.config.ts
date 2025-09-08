@@ -29,11 +29,6 @@ export default defineConfig({
     
     /* Video recording for failed tests */
     video: 'retain-on-failure',
-    
-    /* Extra HTTP headers for auth bypass */
-    extraHTTPHeaders: {
-      'x-test-bypass-auth': 'true',
-    },
   },
 
   /* Configure projects for major browsers */
