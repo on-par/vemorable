@@ -130,7 +130,7 @@ jobs:
   migrate:
     name: Run Database Migrations
     runs-on: ubuntu-latest
-    needs: verify
+    needs: [verify, e2e-tests]
     if: github.event.inputs.skip_migrations != 'true'
     
     steps:
@@ -300,7 +300,7 @@ jobs:
   smoke-tests:
     name: Post-deployment Verification
     runs-on: ubuntu-latest
-    needs: [verify, e2e-tests, migrate]
+    needs: migrate
     if: always() && needs.verify.result == 'success' && needs.e2e-tests.result == 'success'
     
     steps:
