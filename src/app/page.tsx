@@ -1,6 +1,7 @@
 'use client';
 
-import { useAuth, SignInButton, SignUpButton } from '@clerk/nextjs';
+import { useAuth } from '@/lib/auth';
+import { SignInButton, SignUpButton } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import Link from 'next/link';

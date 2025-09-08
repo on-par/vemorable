@@ -7,7 +7,7 @@
  */
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { useAuth } from '@clerk/nextjs';
+import { useAuth } from '@/lib/auth';
 import {
   Note,
   UpdateNoteRequest,

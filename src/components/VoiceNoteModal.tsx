@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { VoiceRecorder } from './VoiceRecorder';
 import { FileUpload } from './FileUpload';
-import { useAuth } from '@clerk/nextjs';
+import { useAuth } from '@/lib/auth';
 import type { Note, TranscriptionResponse, ProcessNoteResponse, CreateNoteResponse } from '@/types/voice-note.types';
 
 interface VoiceNoteModalProps {

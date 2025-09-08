@@ -122,27 +122,114 @@ export async function mockChatAPI(page: Page, notesUsedCount: number = 2) {
  * This comprehensive approach mocks both Clerk client-side and API-level auth
  */
 export async function bypassAuth(page: Page) {
-  // Mock Clerk's client-side auth state
+  // Mock Clerk's client-side auth state - comprehensive mocking
   await page.addInitScript(() => {
-    // Mock Clerk global state
-    (window as unknown as Record<string, unknown>).__clerk_loaded = true;
-    (window as unknown as Record<string, unknown>).__clerk_db_jwt = 'mock-jwt-token';
-    
-    // Mock useAuth hook return values
-    (window as unknown as Record<string, unknown>).__mockAuthState = {
+    const mockUser = {
+      id: 'test-user-id',
+      emailAddresses: [{ 
+        emailAddress: 'test@vemorable.com',
+        id: 'test-email-id',
+        verification: { status: 'verified' }
+      }],
+      firstName: 'Test',
+      lastName: 'User',
+      primaryEmailAddressId: 'test-email-id',
+      username: null,
+      phoneNumbers: [],
+      web3Wallets: [],
+      externalAccounts: [],
+      samlAccounts: [],
+      imageUrl: 'https://via.placeholder.com/150',
+      hasImage: false,
+      publicMetadata: {},
+      unsafeMetadata: {},
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    const mockAuth = {
       isLoaded: true,
       isSignedIn: true,
       userId: 'test-user-id',
-      user: {
-        id: 'test-user-id',
-        emailAddresses: [{ emailAddress: 'test@vemorable.com' }],
-        firstName: 'Test',
-        lastName: 'User',
-      },
+      user: mockUser,
+      sessionId: 'test-session-id',
+      actor: null,
+      orgId: null,
+      orgRole: null,
+      orgSlug: null,
+      has: () => true,
+      signOut: () => Promise.resolve(),
+      getToken: () => Promise.resolve('mock-jwt-token'),
     };
+
+    const mockSession = {
+      id: 'test-session-id',
+      status: 'active',
+      user: mockUser,
+      getToken: () => Promise.resolve('mock-jwt-token'),
+    };
+
+    // Mock various Clerk global states
+    (window as unknown as Record<string, unknown>).__clerk_loaded = true;
+    (window as unknown as Record<string, unknown>).__clerk_db_jwt = 'mock-jwt-token';
+    (window as unknown as Record<string, unknown>).__clerk_ssr_state = {
+      sessionId: 'test-session-id',
+      userId: 'test-user-id',
+      user: mockUser,
+      session: mockSession,
+    };
+
+    // Override require() to intercept Clerk modules
+    if (typeof window !== 'undefined') {
+      // Mock module loading by intercepting imports
+      const originalFetch = window.fetch;
+      window.fetch = function(...args) {
+        const [url] = args;
+        if (typeof url === 'string' && url.includes('@clerk/clerk-js')) {
+          // Return mock Clerk module
+          return Promise.resolve(new Response(JSON.stringify({})));
+        }
+        return originalFetch.apply(this, args);
+      };
+
+      // Mock Clerk React hooks before they get imported
+      (window as unknown as Record<string, unknown>).__CLERK_MOCKS__ = {
+        useAuth: () => mockAuth,
+        useUser: () => ({ isLoaded: true, isSignedIn: true, user: mockUser }),
+        useSession: () => ({ isLoaded: true, session: mockSession }),
+        useClerk: () => ({
+          loaded: true,
+          user: mockUser,
+          session: mockSession,
+          signOut: () => Promise.resolve(),
+        }),
+      };
+
+      // Monkey patch module loader for Next.js chunks
+      const originalDefine = (window as unknown as Record<string, unknown>).define;
+      (window as unknown as Record<string, unknown>).define = function(name: string, deps: string[], factory: Function) {
+        if (name && name.includes('@clerk/nextjs')) {
+          const mockClerkModule = {
+            useAuth: () => mockAuth,
+            useUser: () => ({ isLoaded: true, isSignedIn: true, user: mockUser }),
+            useSession: () => ({ isLoaded: true, session: mockSession }),
+            useClerk: () => ({
+              loaded: true,
+              user: mockUser,
+              session: mockSession,
+              signOut: () => Promise.resolve(),
+            }),
+          };
+          return mockClerkModule;
+        }
+        if (originalDefine) {
+          return originalDefine.call(this, name, deps, factory);
+        }
+      };
+    }
   });
 
-  // Mock Clerk API endpoints
+  // Mock Clerk API endpoints more comprehensively
   await page.route('**/api/auth/**', async (route) => {
     await route.fulfill({
       json: {
@@ -154,10 +241,89 @@ export async function bypassAuth(page: Page) {
     });
   });
 
-  // Mock Clerk's __clerk_ssr_state for SSR scenarios
-  await page.route('**/_next/static/**', async (route) => {
-    // Let static assets pass through normally
-    await route.continue();
+  // Mock Clerk's script loading
+  await page.route('**/clerk.browser.js*', async (route) => {
+    const mockClerkScript = `
+      window.__clerk_frontend_loaded = true;
+      window.Clerk = {
+        loaded: true,
+        user: {
+          id: 'test-user-id',
+          emailAddresses: [{ emailAddress: 'test@vemorable.com' }],
+          firstName: 'Test',
+          lastName: 'User',
+        },
+        session: {
+          id: 'test-session-id',
+          status: 'active',
+          getToken: () => Promise.resolve('mock-jwt-token'),
+        },
+        load: () => Promise.resolve(),
+        isReady: () => true,
+      };
+      
+      // Mock React module for Clerk hooks
+      if (typeof window.__clerk_react_mocks === 'undefined') {
+        window.__clerk_react_mocks = true;
+        
+        // Override the module resolution
+        const originalImport = window.__webpack_require__ || window.require;
+        if (originalImport) {
+          const mockModule = {
+            useAuth: () => ({
+              isLoaded: true,
+              isSignedIn: true,
+              userId: 'test-user-id',
+              user: window.Clerk.user,
+              sessionId: 'test-session-id',
+              signOut: () => Promise.resolve(),
+              getToken: () => Promise.resolve('mock-jwt-token'),
+            }),
+            useUser: () => ({ 
+              isLoaded: true, 
+              isSignedIn: true, 
+              user: window.Clerk.user 
+            }),
+            useSession: () => ({ 
+              isLoaded: true, 
+              session: window.Clerk.session 
+            }),
+          };
+          
+          // Store the mock for later use
+          window.__CLERK_NEXTJS_MOCK__ = mockModule;
+        }
+      }
+    `;
+    
+    await route.fulfill({
+      contentType: 'application/javascript',
+      body: mockClerkScript,
+    });
+  });
+
+  // Mock Clerk's client API endpoints
+  await page.route('**/clerk/**', async (route) => {
+    const url = route.request().url();
+    if (url.includes('/me')) {
+      await route.fulfill({
+        json: {
+          object: 'user',
+          id: 'test-user-id',
+          email_addresses: [
+            {
+              id: 'test-email-id',
+              email_address: 'test@vemorable.com',
+              verification: { status: 'verified' }
+            }
+          ],
+          first_name: 'Test',
+          last_name: 'User',
+        },
+      });
+    } else {
+      await route.continue();
+    }
   });
 }
 

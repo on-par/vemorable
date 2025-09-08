@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { UserButton } from '@clerk/nextjs';
+import { TestAwareUserButton } from '@/components/TestAwareUserButton';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -128,7 +128,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="p-4 border-t">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <UserButton afterSignOutUrl="/" />
+                <TestAwareUserButton afterSignOutUrl="/" />
                 <span className="text-sm font-medium text-gray-700">Account</span>
               </div>
             </div>
@@ -160,7 +160,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 </svg>
               </button>
               <div className="lg:hidden">
-                <UserButton afterSignOutUrl="/" />
+                <TestAwareUserButton afterSignOutUrl="/" />
               </div>
             </div>
           </div>

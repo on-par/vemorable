@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@clerk/nextjs';
+import { useAuth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
 import NotesList from '@/components/NotesList';

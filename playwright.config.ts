@@ -29,6 +29,11 @@ export default defineConfig({
     
     /* Video recording for failed tests */
     video: 'retain-on-failure',
+    
+    /* Extra HTTP headers for auth bypass */
+    extraHTTPHeaders: {
+      'x-test-bypass-auth': 'true',
+    },
   },
 
   /* Configure projects for major browsers */
@@ -50,9 +55,12 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'npm run dev',
+    command: 'PLAYWRIGHT_TEST=true npm run dev',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
+    env: {
+      PLAYWRIGHT_TEST: 'true',
+    },
   },
 });
