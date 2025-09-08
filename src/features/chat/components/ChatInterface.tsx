@@ -84,12 +84,12 @@ ChatInterfaceCore.displayName = 'ChatInterfaceCore';
  */
 const ChatInterface = memo<ChatInterfaceProps>((props) => {
   // Handle errors from chat components
-  const handleChatError = useCallback((error: Error, _errorInfo: React.ErrorInfo) => {
+  const handleChatError = useCallback((error: Error) => {
     console.error('Chat error:', error);
     
     // In production, you might want to send this to an error tracking service
     if (process.env.NODE_ENV === 'production') {
-      // Example: errorTrackingService.captureException(error, { extra: _errorInfo });
+      // Example: errorTrackingService.captureException(error);
     }
   }, []);
 

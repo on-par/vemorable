@@ -10,12 +10,9 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import {
   Note,
-  CreateNoteRequest,
   UpdateNoteRequest,
   AsyncOperationState,
   NotesState,
-  NotesError,
-  NotesErrorCode,
 } from '../types/notes.types';
 import { notesApi } from '../api/notes.api';
 
@@ -70,15 +67,6 @@ export function useNotes(): UseNotesReturn {
         abortControllerRef.current.abort();
       }
     };
-  }, []);
-
-  /**
-   * Safe state setter that only updates if component is still mounted
-   */
-  const safeSetState = useCallback(<T>(setter: (prev: T) => T, state: T) => {
-    if (isMountedRef.current) {
-      setter(state);
-    }
   }, []);
 
   /**

@@ -2,7 +2,7 @@
 
 import { useAuth } from '@clerk/nextjs';
 import { redirect } from 'next/navigation';
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import NotesList from '@/components/NotesList';
 import VoiceNoteModal from '@/components/VoiceNoteModal';
 import { useNotesContext, useNoteOperations } from '@/features/voice-notes/context/NotesContext';

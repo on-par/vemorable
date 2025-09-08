@@ -40,7 +40,7 @@ export interface ApiResponse<T> {
   error?: {
     message: string;
     code: string;
-    details?: any;
+    details?: unknown;
   };
 }
 
@@ -91,7 +91,7 @@ export interface NotesContextValue {
 // Error Types
 export interface NotesError extends Error {
   code: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
 }
 
 export enum NotesErrorCode {

@@ -12,7 +12,6 @@ import React, {
   createContext, 
   useContext, 
   useMemo, 
-  useCallback,
   ErrorInfo,
   ReactNode 
 } from 'react';
@@ -299,7 +298,7 @@ export function useNoteOperations() {
     /**
      * Refresh notes with loading indicator
      */
-    refreshNotesWithLoading: useCallback(async () => {
+    refreshNotesWithLoading: async () => {
       try {
         await refreshNotes();
         return { success: true };
@@ -310,7 +309,7 @@ export function useNoteOperations() {
           error: error instanceof Error ? error.message : 'Refresh failed' 
         };
       }
-    }, [refreshNotes]),
+    },
   }), [addNote, updateNote, deleteNote, refreshNotes]);
 
   return operations;

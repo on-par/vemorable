@@ -30,9 +30,9 @@ const API_CONFIG = {
  */
 export class NotesApiError extends Error implements NotesError {
   code: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
 
-  constructor(message: string, code: string, context?: Record<string, any>) {
+  constructor(message: string, code: string, context?: Record<string, unknown>) {
     super(message);
     this.name = 'NotesApiError';
     this.code = code;
