@@ -44,6 +44,7 @@ vi.mock('@/lib/api-utils')
 
 // Import the mocked functions
 import { getAuthenticatedUserId, successResponse, errorResponse, handleApiError } from '@/lib/api-utils'
+// @ts-expect-error - mockTranscriptionsCreate is exported from our mock
 import { mockTranscriptionsCreate } from 'openai'
 
 // Import the module under test
