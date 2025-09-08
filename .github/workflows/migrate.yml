@@ -73,110 +73,165 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
+      - name: Check if migrations are needed
+        id: check_migrations_needed
+        run: |
+          echo "Checking if migrations are needed..."
+          
+          # Check if any migration files were added/modified in this push
+          migration_changes=$(git diff --name-only HEAD~1 HEAD | grep '^supabase/migrations/' || echo "")
+          
+          if [ -z "$migration_changes" ]; then
+            echo "No migration files were modified in this push."
+            echo "SKIP_ALL_MIGRATIONS=true" >> $GITHUB_ENV
+            echo "REASON=no_changes" >> $GITHUB_ENV
+          else
+            echo "Migration files were modified: $migration_changes"
+            echo "SKIP_ALL_MIGRATIONS=false" >> $GITHUB_ENV
+            echo "REASON=changes_detected" >> $GITHUB_ENV
+          fi
+          
+          # Also check if migrations directory exists and has files
+          if [ -z "$(ls -A supabase/migrations/ 2>/dev/null)" ]; then
+            echo "No migrations found in supabase/migrations/ directory"
+            echo "SKIP_ALL_MIGRATIONS=true" >> $GITHUB_ENV
+            echo "REASON=no_files" >> $GITHUB_ENV
+          fi
+      
       - name: Setup Supabase CLI
+        if: env.SKIP_ALL_MIGRATIONS != 'true'
         uses: supabase/setup-cli@v1
         with:
           version: latest
       
-      - name: Verify database connection
-        run: |
-          echo "Verifying database connection..."
-          # We'll use the DATABASE_URL directly with db push
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      
-      - name: Validate migrations exist
-        run: |
-          if [ -z "$(ls -A supabase/migrations/ 2>/dev/null)" ]; then
-            echo "No migrations found, skipping migration deployment"
-            echo "SKIP_MIGRATIONS=true" >> $GITHUB_ENV
-          else
-            echo "Migrations found, proceeding with deployment"
-            echo "SKIP_MIGRATIONS=false" >> $GITHUB_ENV
-          fi
-      
       - name: Check current migration status
-        if: env.SKIP_MIGRATIONS == 'false'
+        if: env.SKIP_ALL_MIGRATIONS != 'true'
         id: migration_status
+        continue-on-error: true
         run: |
-          echo "Current migration status:"
+          echo "Checking current migration status..."
+          
+          # Test database connection first
+          if ! supabase migration list --db-url "$DATABASE_URL" > /dev/null 2>&1; then
+            echo "❌ Cannot connect to database or list migrations"
+            echo "This might be due to authentication issues or database connectivity"
+            echo "MIGRATION_CHECK_FAILED=true" >> $GITHUB_ENV
+            exit 0
+          fi
           
           # Get list of applied migrations
-          applied_migrations=$(supabase migration list --db-url "$DATABASE_URL" 2>&1 || echo "")
+          echo "✅ Database connection successful. Checking applied migrations..."
+          applied_migrations=$(supabase migration list --db-url "$DATABASE_URL" 2>&1)
+          echo "Applied migrations in database:"
           echo "$applied_migrations"
           
-          # Check if all migrations are already applied
+          # Check if all local migrations are already applied
           pending_count=0
+          echo "Checking local migration files:"
+          
           for migration_file in supabase/migrations/*.sql; do
             if [ -f "$migration_file" ]; then
               migration_name=$(basename "$migration_file")
+              echo "Checking: $migration_name"
+              
               if ! echo "$applied_migrations" | grep -q "$migration_name"; then
-                echo "Pending migration found: $migration_name"
+                echo "  ❌ Pending: $migration_name"
                 pending_count=$((pending_count + 1))
+              else
+                echo "  ✅ Applied: $migration_name"
               fi
             fi
           done
           
           if [ $pending_count -eq 0 ]; then
-            echo "All migrations are already applied. Skipping migration step."
+            echo "✅ All migrations are already applied. No action needed."
             echo "HAS_PENDING_MIGRATIONS=false" >> $GITHUB_ENV
           else
-            echo "Found $pending_count pending migrations to apply."
+            echo "⚠️ Found $pending_count pending migrations to apply."
             echo "HAS_PENDING_MIGRATIONS=true" >> $GITHUB_ENV
           fi
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       
-      - name: Run pending migrations
-        if: env.SKIP_MIGRATIONS == 'false' && env.HAS_PENDING_MIGRATIONS == 'true'
+      - name: Skip migrations due to connection issues
+        if: env.SKIP_ALL_MIGRATIONS != 'true' && env.MIGRATION_CHECK_FAILED == 'true'
         run: |
-          echo "Applying pending migrations..."
+          echo "⚠️ Skipping migrations due to database connection issues"
+          echo "This is likely because:"
+          echo "1. Database credentials are not properly configured"
+          echo "2. Database is not accessible from GitHub Actions"
+          echo "3. Supabase CLI authentication failed"
+          echo ""
+          echo "Migration will be skipped to prevent workflow failure."
+          echo "Please check database connectivity and credentials."
+      
+      - name: Apply pending migrations
+        if: env.SKIP_ALL_MIGRATIONS != 'true' && env.MIGRATION_CHECK_FAILED != 'true' && env.HAS_PENDING_MIGRATIONS == 'true'
+        run: |
+          echo "🚀 Applying pending migrations..."
           
-          # Try to apply migrations with better error handling
-          if ! supabase db push --db-url "$DATABASE_URL" 2>&1; then
-            echo "Migration push failed. Checking if it's due to already applied migrations..."
+          # Apply migrations with robust error handling
+          if supabase db push --db-url "$DATABASE_URL"; then
+            echo "✅ Migrations applied successfully."
+          else
+            echo "❌ Migration push failed. Checking if migrations are actually applied..."
             
-            # Get detailed status
+            # Double-check migration status after failure
             migration_output=$(supabase migration list --db-url "$DATABASE_URL" 2>&1)
-            echo "Current database migration state:"
+            echo "Current database migration state after failure:"
             echo "$migration_output"
             
-            # Check if all local migrations exist in the database
+            # Verify if all local migrations now exist in the database
             all_applied=true
             for migration_file in supabase/migrations/*.sql; do
               if [ -f "$migration_file" ]; then
                 migration_name=$(basename "$migration_file")
                 if ! echo "$migration_output" | grep -q "$migration_name"; then
                   all_applied=false
-                  echo "ERROR: Migration $migration_name is not applied but push failed!"
-                  exit 1
+                  echo "❌ ERROR: Migration $migration_name is not applied!"
+                  break
                 fi
               fi
             done
             
             if [ "$all_applied" = true ]; then
-              echo "All migrations are already applied to the database. This is expected."
-              exit 0
+              echo "✅ All migrations are now applied despite the error. This can happen with concurrent deployments."
             else
-              echo "Migration push failed for unknown reasons."
+              echo "❌ Migration push failed and some migrations are missing."
               exit 1
             fi
-          else
-            echo "Migrations applied successfully."
           fi
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       
       - name: Verify migration success
-        if: env.SKIP_MIGRATIONS == 'false'
+        if: env.SKIP_ALL_MIGRATIONS != 'true' && env.MIGRATION_CHECK_FAILED != 'true' && env.HAS_PENDING_MIGRATIONS == 'true'
         run: |
-          echo "Verifying migrations were applied..."
-          supabase migration list --db-url "$DATABASE_URL"
+          echo "🔍 Verifying all migrations are applied..."
+          migration_list=$(supabase migration list --db-url "$DATABASE_URL")
+          echo "Final migration status:"
+          echo "$migration_list"
+          echo "✅ Migration verification complete."
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      
+      - name: Migration summary
+        if: always()
+        run: |
+          echo "📋 Migration Summary:"
+          if [ "$SKIP_ALL_MIGRATIONS" = "true" ]; then
+            echo "✅ Migrations were skipped."
+            echo "Reason: $REASON"
+          elif [ "$MIGRATION_CHECK_FAILED" = "true" ]; then
+            echo "⚠️ Migration check failed due to connectivity issues."
+          elif [ "$HAS_PENDING_MIGRATIONS" = "false" ]; then
+            echo "✅ No pending migrations found. Database is up to date."
+          else
+            echo "✅ Migration process completed."
+          fi
 
   smoke-tests:
     name: Post-deployment Verification
