@@ -14,7 +14,7 @@ import {
   UpdateNoteRequest,
   AsyncOperationState,
   NotesState,
-  NotesApiError,
+  NotesError,
   NotesErrorCode,
 } from '../types/notes.types';
 import { notesApi } from '../api/notes.api';
@@ -87,22 +87,16 @@ export function useNotes(): UseNotesReturn {
   const handleError = useCallback((error: unknown, operation: string) => {
     console.error(`Notes ${operation} error:`, error);
     
-    if (error instanceof NotesApiError) {
-      const errorMessage = `${operation} failed: ${error.message}`;
-      safeSetState(setError, errorMessage);
-      return errorMessage;
-    }
-    
     if (error instanceof Error) {
       const errorMessage = `${operation} failed: ${error.message}`;
-      safeSetState(setError, errorMessage);
+      setError(errorMessage);
       return errorMessage;
     }
     
     const errorMessage = `${operation} failed: Unknown error`;
-    safeSetState(setError, errorMessage);
+    setError(errorMessage);
     return errorMessage;
-  }, [safeSetState]);
+  }, []);
 
   /**
    * Fetch all notes with proper loading states and error handling
@@ -162,7 +156,7 @@ export function useNotes(): UseNotesReturn {
     // Find the original note for potential rollback
     const originalNote = notes.find(note => note.id === id);
     if (!originalNote) {
-      const error = new NotesApiError('Note not found', NotesErrorCode.VALIDATION_ERROR);
+      const error = new Error('Note not found');
       setUpdateState({ status: 'error', error });
       handleError(error, 'Update note');
       return;
@@ -198,7 +192,7 @@ export function useNotes(): UseNotesReturn {
     // Find the original note for potential rollback
     const originalNote = notes.find(note => note.id === noteId);
     if (!originalNote) {
-      const error = new NotesApiError('Note not found', NotesErrorCode.VALIDATION_ERROR);
+      const error = new Error('Note not found');
       setDeleteState({ status: 'error', error });
       handleError(error, 'Delete note');
       return;

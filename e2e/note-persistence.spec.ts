@@ -189,8 +189,8 @@ test.describe('Note Persistence Across Navigation', () => {
     
     // Verify final note count
     const expectedCount = notes.length;
-    const noteCountText = new RegExp(`${expectedCount} note${expectedCount > 1 ? 's' : ''}`);
-    await expect(page.locator(noteCountText)).toBeVisible();
+    const noteCountText = `${expectedCount} note${expectedCount > 1 ? 's' : ''}`;
+    await expect(page.getByText(noteCountText)).toBeVisible();
   });
 
   test('should preserve note state when using browser back/forward navigation', async ({ page }) => {
