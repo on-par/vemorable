@@ -30,7 +30,7 @@ jobs:
       
       # Type checking
       - name: Type check
-        run: npx tsc --noEmit
+        run: npm run type-check
       
       # Linting
       - name: Lint code

@@ -17,6 +17,7 @@
     "test:e2e:debug": "playwright test --debug",
     "test:persistence": "npm run test && npm run test:e2e",
     "test:search": "tsx scripts/test-search.ts",
+    "type-check": "npx tsc --noEmit",
     "setup:storage": "tsx scripts/setup-storage.ts"
   },
   "dependencies": {
