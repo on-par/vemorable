@@ -50,7 +50,7 @@ jobs:
         run: npm run build
       
       # Run tests
-      - name: Run tests
+      - name: Run tests with coverage
         env:
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
@@ -59,7 +59,7 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        run: npm test
+        run: npm run test:coverage
       
       # Supabase Migration Validation
       - name: Setup Supabase CLI
