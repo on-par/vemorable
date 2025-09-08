@@ -1,30 +1,28 @@
 'use client';
 
 import { UserButton } from '@clerk/nextjs';
+import { useState, useEffect } from 'react';
 
 /**
- * Check if we're in a test environment
- * This function works consistently on both server and client
+ * Server-side test environment check
  */
-function isTestEnvironment(): boolean {
-  // Check environment variables first (works on both server and client in Next.js)
-  if (typeof process !== 'undefined' && process.env) {
-    if (process.env.NODE_ENV === 'test' || process.env.PLAYWRIGHT_TEST === 'true') {
-      return true;
-    }
-  }
+function isServerTestEnvironment(): boolean {
+  return typeof process !== 'undefined' && process.env && 
+         (process.env.NODE_ENV === 'test' || process.env.PLAYWRIGHT_TEST === 'true');
+}
+
+/**
+ * Client-side test environment check
+ */
+function isClientTestEnvironment(): boolean {
+  if (typeof window === 'undefined') return false;
   
-  // Client-side checks
-  if (typeof window !== 'undefined') {
-    return (
-      window.location.hostname === 'localhost' && 
-      (window.navigator.userAgent.includes('playwright') || 
-       window.navigator.userAgent.includes('HeadlessChrome') ||
-       window.navigator.userAgent.includes('ChromeHeadless'))
-    );
-  }
-  
-  return false;
+  return (
+    window.location.hostname === 'localhost' && 
+    (window.navigator.userAgent.includes('playwright') || 
+     window.navigator.userAgent.includes('HeadlessChrome') ||
+     window.navigator.userAgent.includes('ChromeHeadless'))
+  );
 }
 
 /**
@@ -41,15 +39,48 @@ function MockUserButton() {
   );
 }
 
+/**
+ * Loading state component to prevent hydration mismatch
+ */
+function LoadingUserButton() {
+  return (
+    <div 
+      className="w-8 h-8 rounded-full bg-gray-200 animate-pulse"
+      data-testid="loading-user-button"
+    />
+  );
+}
+
 interface TestAwareUserButtonProps {
   afterSignOutUrl?: string;
 }
 
 /**
  * UserButton wrapper that renders consistently in test environments
+ * and prevents hydration mismatch
  */
 export function TestAwareUserButton({ afterSignOutUrl }: TestAwareUserButtonProps) {
-  if (isTestEnvironment()) {
+  const [isClient, setIsClient] = useState(false);
+  const [isTestEnv, setIsTestEnv] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    setIsTestEnv(isServerTestEnvironment() || isClientTestEnvironment());
+  }, []);
+
+  // During SSR or before client hydration, return loading state
+  // if we might be in test environment
+  if (!isClient && isServerTestEnvironment()) {
+    return <LoadingUserButton />;
+  }
+
+  // Show loading state until client hydration is complete
+  if (!isClient) {
+    return <LoadingUserButton />;
+  }
+
+  // After client-side hydration
+  if (isTestEnv) {
     return <MockUserButton />;
   }
   

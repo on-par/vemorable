@@ -3,6 +3,7 @@
  */
 
 import { useAuth as useClerkAuth, useUser as useClerkUser } from '@clerk/nextjs';
+import { useState, useEffect } from 'react';
 
 interface AuthState {
   isLoaded: boolean;
@@ -12,28 +13,25 @@ interface AuthState {
 }
 
 /**
- * Check if we're in a test environment
- * This function works consistently on both server and client
+ * Server-side test environment check
  */
-function isTestEnvironment(): boolean {
-  // Check environment variables first (works on both server and client in Next.js)
-  if (typeof process !== 'undefined' && process.env) {
-    if (process.env.NODE_ENV === 'test' || process.env.PLAYWRIGHT_TEST === 'true') {
-      return true;
-    }
-  }
+function isServerTestEnvironment(): boolean {
+  return typeof process !== 'undefined' && process.env && 
+         (process.env.NODE_ENV === 'test' || process.env.PLAYWRIGHT_TEST === 'true');
+}
+
+/**
+ * Client-side test environment check
+ */
+function isClientTestEnvironment(): boolean {
+  if (typeof window === 'undefined') return false;
   
-  // Client-side checks
-  if (typeof window !== 'undefined') {
-    return (
-      window.location.hostname === 'localhost' && 
-      (window.navigator.userAgent.includes('playwright') || 
-       window.navigator.userAgent.includes('HeadlessChrome') ||
-       window.navigator.userAgent.includes('ChromeHeadless'))
-    );
-  }
-  
-  return false;
+  return (
+    window.location.hostname === 'localhost' && 
+    (window.navigator.userAgent.includes('playwright') || 
+     window.navigator.userAgent.includes('HeadlessChrome') ||
+     window.navigator.userAgent.includes('ChromeHeadless'))
+  );
 }
 
 /**
@@ -52,10 +50,36 @@ const TEST_AUTH_STATE: AuthState = {
 };
 
 /**
+ * Loading state to prevent hydration mismatch
+ */
+const LOADING_AUTH_STATE: AuthState = {
+  isLoaded: false,
+  isSignedIn: false,
+  userId: null,
+  user: null
+};
+
+/**
  * Wrapper around Clerk's useAuth that provides test fallbacks
+ * and prevents hydration mismatch
  */
 export function useAuth(): AuthState {
-  if (isTestEnvironment()) {
+  const [isClient, setIsClient] = useState(false);
+  const [isTestEnv, setIsTestEnv] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    setIsTestEnv(isServerTestEnvironment() || isClientTestEnvironment());
+  }, []);
+
+  // During SSR or before client hydration, return loading state
+  // if we might be in test environment
+  if (!isClient && isServerTestEnvironment()) {
+    return LOADING_AUTH_STATE;
+  }
+
+  // After client-side hydration
+  if (isClient && isTestEnv) {
     return TEST_AUTH_STATE;
   }
 
@@ -68,16 +92,37 @@ export function useAuth(): AuthState {
       user: clerkAuth.user,
     };
   } catch (error) {
-    console.warn('Clerk auth error, using test fallback:', error);
-    return TEST_AUTH_STATE;
+    console.warn('Clerk auth error, using fallback:', error);
+    // In test environments, return test state; otherwise loading state
+    return isClient && isTestEnv ? TEST_AUTH_STATE : LOADING_AUTH_STATE;
   }
 }
 
 /**
  * Wrapper around Clerk's useUser that provides test fallbacks
+ * and prevents hydration mismatch
  */
 export function useUser() {
-  if (isTestEnvironment()) {
+  const [isClient, setIsClient] = useState(false);
+  const [isTestEnv, setIsTestEnv] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    setIsTestEnv(isServerTestEnvironment() || isClientTestEnvironment());
+  }, []);
+
+  // During SSR or before client hydration, return loading state
+  // if we might be in test environment
+  if (!isClient && isServerTestEnvironment()) {
+    return {
+      isLoaded: false,
+      isSignedIn: false,
+      user: null,
+    };
+  }
+
+  // After client-side hydration
+  if (isClient && isTestEnv) {
     return {
       isLoaded: true,
       isSignedIn: true,
@@ -88,11 +133,9 @@ export function useUser() {
   try {
     return useClerkUser();
   } catch (error) {
-    console.warn('Clerk user error, using test fallback:', error);
-    return {
-      isLoaded: true,
-      isSignedIn: true,
-      user: TEST_AUTH_STATE.user,
-    };
+    console.warn('Clerk user error, using fallback:', error);
+    return isClient && isTestEnv 
+      ? { isLoaded: true, isSignedIn: true, user: TEST_AUTH_STATE.user }
+      : { isLoaded: false, isSignedIn: false, user: null };
   }
 }
