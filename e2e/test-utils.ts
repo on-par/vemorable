@@ -125,11 +125,11 @@ export async function bypassAuth(page: Page) {
   // Mock Clerk's client-side auth state
   await page.addInitScript(() => {
     // Mock Clerk global state
-    (window as any).__clerk_loaded = true;
-    (window as any).__clerk_db_jwt = 'mock-jwt-token';
+    (window as unknown as Record<string, unknown>).__clerk_loaded = true;
+    (window as unknown as Record<string, unknown>).__clerk_db_jwt = 'mock-jwt-token';
     
     // Mock useAuth hook return values
-    (window as any).__mockAuthState = {
+    (window as unknown as Record<string, unknown>).__mockAuthState = {
       isLoaded: true,
       isSignedIn: true,
       userId: 'test-user-id',

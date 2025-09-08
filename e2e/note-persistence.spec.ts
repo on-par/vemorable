@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { setupTestEnvironment, waitForDashboardLoad, waitForChatLoad, navigateToDashboard, navigateToChat, MockNote } from './test-utils';
+import { setupTestEnvironment, waitForDashboardLoad, waitForChatLoad, navigateToDashboard, navigateToChat } from './test-utils';
 
 /**
  * E2E tests for note persistence across navigation
