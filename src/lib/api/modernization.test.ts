@@ -3,6 +3,7 @@ import { createNotesService, createSearchService, createChatService } from '../s
 import { modernizeApiRoutes, ApiRouteFactory } from './factory'
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedUserId } from './auth'
+import { generateQueryEmbedding } from '../embeddings'
 
 // Import the RequestContext type for proper typing
 type RequestContext = {
@@ -14,16 +15,15 @@ type RequestContext = {
 // Mock the services
 vi.mock('../supabase/services')
 vi.mock('./auth')
-vi.mock('../embeddings')
+vi.mock('../embeddings', () => ({
+  generateQueryEmbedding: vi.fn(),
+}))
 
 const mockCreateNotesService = createNotesService as any
 const mockCreateSearchService = createSearchService as any
 const mockCreateChatService = createChatService as any
 const mockGetAuthenticatedUserId = getAuthenticatedUserId as any
 
-// Mock embeddings
-const { generateQueryEmbedding } = require('../embeddings')
-const mockGenerateQueryEmbedding = generateQueryEmbedding as any
 
 // Mock services
 const mockNotesService = {
@@ -56,9 +56,10 @@ mockCreateChatService.mockResolvedValue(mockChatService as any)
 mockGetAuthenticatedUserId.mockResolvedValue('test-user-id')
 
 // Mock embedding generation
-mockGenerateQueryEmbedding.mockResolvedValue({
+vi.mocked(generateQueryEmbedding).mockResolvedValue({
   embedding: new Array(1536).fill(0.1), // Mock embedding vector
-  usage: { total_tokens: 10, prompt_tokens: 10, completion_tokens: 0 }
+  model: 'text-embedding-ada-002',
+  usage: { total_tokens: 10, prompt_tokens: 10 }
 })
 
 describe('Modern API Route Architecture', () => {

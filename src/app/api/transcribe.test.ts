@@ -33,15 +33,20 @@ vi.mock('openai', () => {
     }
   }
 
-  const MockedOpenAI = vi.fn().mockImplementation(() => ({
-    audio: {
-      transcriptions: {
-        create: (...args: any[]) => mockTranscriptionsCreate(...args),
+  const MockedOpenAI = function() {
+    return {
+      audio: {
+        transcriptions: {
+          create: (...args: any[]) => mockTranscriptionsCreate(...args),
+        },
       },
-    },
-  }))
-  ;(MockedOpenAI as any).APIError = MockAPIError
-  return MockedOpenAI
+    }
+  }
+  MockedOpenAI.APIError = MockAPIError
+  
+  return {
+    default: MockedOpenAI
+  }
 })
 
 describe('/api/transcribe', () => {
