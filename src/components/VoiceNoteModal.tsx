@@ -375,7 +375,7 @@ export default function VoiceNoteModal({ isOpen, onClose, onNoteCreated }: Voice
                 value={textContent}
                 onChange={(e) => setTextContent(e.target.value)}
                 placeholder="Type or paste your note here..."
-                className="w-full h-64 p-4 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full h-64 p-4 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
                 autoFocus
               />
               
