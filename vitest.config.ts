@@ -41,7 +41,7 @@ export default defineConfig({
       },
     },
     // Include pattern matching CLAUDE.md guidelines: *.test.ts, *.test.tsx
-    include: ['src/**/*.test.{ts,tsx}'],
+    include: ['src/**/*.test.{ts,tsx}', 'tests/**/*.test.{ts,tsx}'],
     // Exclude unnecessary directories and files
     exclude: [
       'node_modules',
