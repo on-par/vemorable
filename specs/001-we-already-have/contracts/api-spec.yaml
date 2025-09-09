@@ -1,0 +1,591 @@
+openapi: 3.0.3
+info:
+  title: VeMorable API
+  description: AI-powered note-taking platform with voice transcription and semantic search
+  version: 1.0.0
+  contact:
+    name: VeMorable API Support
+    url: https://vemorable.com/support
+
+servers:
+  - url: https://vemorable.vercel.app/api
+    description: Production API
+  - url: http://localhost:3000/api
+    description: Development API
+
+components:
+  securitySchemes:
+    Bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  
+  schemas:
+    Note:
+      type: object
+      required: [id, user_id, title, content, source_type, processing_status, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        user_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          maxLength: 200
+          example: "Meeting notes with Sarah"
+        content:
+          type: string
+          example: "Discussed project timeline and deliverables..."
+        processed_content:
+          type: string
+          example: "## Meeting Summary\n- Project timeline\n- Deliverables..."
+        summary:
+          type: string
+          maxLength: 500
+          example: "Brief discussion about project milestones"
+        source_type:
+          type: string
+          enum: [voice, text]
+          example: "voice"
+        language:
+          type: string
+          example: "en"
+        confidence_score:
+          type: number
+          minimum: 0
+          maximum: 1
+          example: 0.95
+        processing_status:
+          type: string
+          enum: [pending, transcribing, processing, complete, error, retry]
+          example: "complete"
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        processed_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    Tag:
+      type: object
+      required: [id, user_id, name, confidence, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 50
+          example: "work"
+        description:
+          type: string
+          maxLength: 200
+          example: "Work-related notes and tasks"
+        note_count:
+          type: integer
+          minimum: 0
+          example: 15
+        confidence:
+          type: number
+          minimum: 0.6
+          maximum: 1.0
+          example: 0.85
+        created_at:
+          type: string
+          format: date-time
+
+    Summary:
+      type: object
+      required: [id, user_id, title, content, query, note_count, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          maxLength: 200
+          example: "Work Project Summary"
+        content:
+          type: string
+          example: "Based on your recent notes about work projects..."
+        query:
+          type: string
+          example: "summarize my work notes from this week"
+        note_count:
+          type: integer
+          minimum: 2
+          example: 8
+        access_count:
+          type: integer
+          example: 3
+        created_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+
+    CreateNoteRequest:
+      type: object
+      required: [content, source_type]
+      properties:
+        content:
+          type: string
+          minLength: 1
+          example: "This is my text note about the meeting"
+        source_type:
+          type: string
+          enum: [text]
+        title:
+          type: string
+          maxLength: 200
+          example: "Meeting Notes"
+
+    CreateVoiceNoteRequest:
+      type: object
+      required: [audio_data, source_type]
+      properties:
+        audio_data:
+          type: string
+          format: byte
+          description: "Base64 encoded audio file"
+        source_type:
+          type: string
+          enum: [voice]
+        title:
+          type: string
+          maxLength: 200
+          example: "Voice Memo"
+
+    SearchRequest:
+      type: object
+      required: [query]
+      properties:
+        query:
+          type: string
+          minLength: 1
+          maxLength: 500
+          example: "notes about project deadlines"
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 10
+        similarity_threshold:
+          type: number
+          minimum: 0.1
+          maximum: 1.0
+          default: 0.7
+
+    SearchResponse:
+      type: object
+      properties:
+        query:
+          type: string
+        results:
+          type: array
+          items:
+            type: object
+            properties:
+              note:
+                $ref: '#/components/schemas/Note'
+              similarity_score:
+                type: number
+                minimum: 0
+                maximum: 1
+              relevance_snippet:
+                type: string
+                maxLength: 300
+        total_count:
+          type: integer
+        search_time_ms:
+          type: integer
+
+    CreateSummaryRequest:
+      type: object
+      required: [query]
+      properties:
+        query:
+          type: string
+          minLength: 1
+          maxLength: 500
+          example: "summarize my work notes from this week"
+        note_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: "Optional: specific note IDs to include"
+
+    ErrorResponse:
+      type: object
+      required: [error, message]
+      properties:
+        error:
+          type: string
+          example: "VALIDATION_ERROR"
+        message:
+          type: string
+          example: "Content cannot be empty"
+        details:
+          type: object
+          additionalProperties: true
+
+security:
+  - Bearer: []
+
+paths:
+  /notes:
+    get:
+      summary: List user's notes
+      description: Retrieve paginated list of user's notes with optional filtering
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, transcribing, processing, complete, error]
+        - name: source_type
+          in: query
+          schema:
+            type: string
+            enum: [voice, text]
+      responses:
+        '200':
+          description: List of notes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  notes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Note'
+                  pagination:
+                    type: object
+                    properties:
+                      page:
+                        type: integer
+                      limit:
+                        type: integer
+                      total:
+                        type: integer
+                      has_next:
+                        type: boolean
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      summary: Create a text note
+      description: Create a new text-based note
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNoteRequest'
+      responses:
+        '201':
+          description: Note created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Note'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /notes/{id}:
+    get:
+      summary: Get specific note
+      description: Retrieve a single note by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Note details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Note'
+        '404':
+          description: Note not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      summary: Update note
+      description: Update an existing note's content or title
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  maxLength: 200
+                content:
+                  type: string
+                  minLength: 1
+      responses:
+        '200':
+          description: Note updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Note'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Note not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Delete note
+      description: Permanently delete a note and its associated data
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Note deleted successfully
+        '404':
+          description: Note not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /notes/voice:
+    post:
+      summary: Create voice note
+      description: Upload audio file and create voice-based note with transcription
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [audio]
+              properties:
+                audio:
+                  type: string
+                  format: binary
+                  description: "Audio file (supported: mp3, wav, m4a, webm)"
+                title:
+                  type: string
+                  maxLength: 200
+      responses:
+        '201':
+          description: Voice note created, transcription in progress
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Note'
+        '400':
+          description: Invalid audio file or request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '413':
+          description: Audio file too large (max 25MB)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /search:
+    post:
+      summary: Semantic search notes
+      description: Search through notes using natural language queries
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+        '400':
+          description: Invalid search query
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /summaries:
+    get:
+      summary: List user's summaries
+      description: Retrieve user's generated summaries
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+      responses:
+        '200':
+          description: List of summaries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  summaries:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Summary'
+
+    post:
+      summary: Generate summary
+      description: Create AI-generated summary from multiple notes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSummaryRequest'
+      responses:
+        '201':
+          description: Summary generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Summary'
+        '400':
+          description: Invalid request or insufficient notes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /tags:
+    get:
+      summary: List user's tags
+      description: Retrieve all tags used by the user with usage statistics
+      responses:
+        '200':
+          description: List of tags
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tags:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Tag'
+
+  /health:
+    get:
+      summary: Health check
+      description: Check API health and dependencies
+      security: []
+      responses:
+        '200':
+          description: Service healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "healthy"
+                  timestamp:
+                    type: string
+                    format: date-time
+                  services:
+                    type: object
+                    properties:
+                      database:
+                        type: string
+                        example: "connected"
+                      openai:
+                        type: string
+                        example: "available"

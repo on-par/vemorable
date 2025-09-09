@@ -269,6 +269,8 @@ export function useNoteOperations() {
           await new Promise(resolve => setTimeout(resolve, attempt * 1000));
         }
       }
+      // This should never be reached, but TypeScript requires it
+      return { success: false, error: 'Update failed - no attempts made' };
     },
 
     /**
