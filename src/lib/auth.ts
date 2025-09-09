@@ -9,7 +9,12 @@ interface AuthState {
   isLoaded: boolean;
   isSignedIn: boolean;
   userId: string | null;
-  user?: any;
+  user?: {
+    id: string;
+    emailAddresses: Array<{ emailAddress: string }>;
+    firstName?: string | null;
+    lastName?: string | null;
+  } | null;
 }
 
 /**
@@ -27,7 +32,7 @@ function isClientTestEnvironment(): boolean {
   if (typeof window === 'undefined') return false;
   
   // Check for explicit test flag first
-  if ((window as any).__PLAYWRIGHT_TEST__) return true;
+  if (window.__PLAYWRIGHT_TEST__) return true;
   
   return (
     window.location.hostname === 'localhost' && 
@@ -70,6 +75,10 @@ export function useAuth(): AuthState {
   const [isClient, setIsClient] = useState(false);
   const [isTestEnv, setIsTestEnv] = useState(false);
 
+  // Always call hooks at the top level
+  const clerkAuth = useClerkAuth();
+  const clerkUser = useClerkUser();
+
   useEffect(() => {
     setIsClient(true);
     setIsTestEnv(isServerTestEnvironment() || isClientTestEnvironment());
@@ -86,9 +95,8 @@ export function useAuth(): AuthState {
     return TEST_AUTH_STATE;
   }
 
+  // Use clerk auth data if available, otherwise fallback
   try {
-    const clerkAuth = useClerkAuth();
-    const clerkUser = useClerkUser();
     return {
       isLoaded: clerkAuth.isLoaded,
       isSignedIn: !!clerkAuth.isSignedIn,
@@ -109,6 +117,9 @@ export function useAuth(): AuthState {
 export function useUser() {
   const [isClient, setIsClient] = useState(false);
   const [isTestEnv, setIsTestEnv] = useState(false);
+
+  // Always call hooks at the top level
+  const clerkUser = useClerkUser();
 
   useEffect(() => {
     setIsClient(true);
@@ -134,8 +145,9 @@ export function useUser() {
     };
   }
 
+  // Use clerk user data if available, otherwise fallback
   try {
-    return useClerkUser();
+    return clerkUser;
   } catch (error) {
     console.warn('Clerk user error, using fallback:', error);
     return isClient && isTestEnv 
