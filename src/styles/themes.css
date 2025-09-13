@@ -1,0 +1,344 @@
+/* Dark Theme Variables and Future Light Theme Structure */
+
+/* ===================================
+ * DARK THEME (Primary Theme)
+ * =================================== */
+[data-theme="dark"], :root {
+  /* Core color system */
+  --theme-background-primary: #212121;
+  --theme-background-secondary: #2f2f2f;
+  --theme-background-tertiary: #404040;
+  --theme-background-elevated: #353535;
+  --theme-background-overlay: rgba(33, 33, 33, 0.95);
+  
+  /* Interactive backgrounds */
+  --theme-background-hover: #3c4043;
+  --theme-background-active: #48494b;
+  --theme-background-selected: #2d4356;
+  
+  /* Text colors */
+  --theme-text-primary: #e8eaed;
+  --theme-text-secondary: #9aa0a6;
+  --theme-text-tertiary: #70757a;
+  --theme-text-disabled: #5f6368;
+  --theme-text-inverse: #212121;
+  
+  /* Accent colors */
+  --theme-accent-primary: #8ab4f8;
+  --theme-accent-secondary: #aecbfa;
+  --theme-accent-hover: #c8d7fb;
+  --theme-accent-active: #7ba7f7;
+  
+  /* Status colors */
+  --theme-success: #34a853;
+  --theme-success-hover: #2d8f47;
+  --theme-warning: #fbbc04;
+  --theme-warning-hover: #f9ab00;
+  --theme-error: #ea4335;
+  --theme-error-hover: #d33b2c;
+  --theme-info: #4285f4;
+  --theme-info-hover: #3367d6;
+  
+  /* Border colors */
+  --theme-border-default: #444746;
+  --theme-border-muted: #353638;
+  --theme-border-strong: #5f6368;
+  --theme-border-interactive: #8ab4f8;
+  
+  /* Voice/Audio specific colors */
+  --theme-voice-recording: #ea4335;
+  --theme-voice-processing: #fbbc04;
+  --theme-voice-complete: #34a853;
+  --theme-voice-waveform: #8ab4f8;
+  
+  /* Chat/Message specific colors */
+  --theme-message-user-bg: #2d4356;
+  --theme-message-assistant-bg: #2f2f2f;
+  --theme-message-system-bg: #353638;
+  
+  /* Input specific colors */
+  --theme-input-background: #353638;
+  --theme-input-border: #444746;
+  --theme-input-border-focus: #8ab4f8;
+  --theme-input-placeholder: #9aa0a6;
+  
+  /* Button specific colors */
+  --theme-button-primary-bg: #8ab4f8;
+  --theme-button-primary-text: #212121;
+  --theme-button-primary-hover: #aecbfa;
+  --theme-button-secondary-bg: transparent;
+  --theme-button-secondary-text: #e8eaed;
+  --theme-button-secondary-border: #444746;
+  --theme-button-secondary-hover: #3c4043;
+  --theme-button-ghost-hover: rgba(138, 180, 248, 0.1);
+  
+  /* Shadow system */
+  --theme-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --theme-shadow-md: 0 4px 8px rgba(0, 0, 0, 0.5);
+  --theme-shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.6);
+  --theme-shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.7);
+  
+  /* Gradient system */
+  --theme-gradient-background: linear-gradient(135deg, #212121 0%, #2f2f2f 100%);
+  --theme-gradient-overlay: linear-gradient(135deg, rgba(33, 33, 33, 0.9) 0%, rgba(47, 47, 47, 0.9) 100%);
+  --theme-gradient-button: linear-gradient(135deg, #8ab4f8 0%, #aecbfa 100%);
+  
+  /* Animation and transition colors */
+  --theme-loading-primary: #8ab4f8;
+  --theme-loading-secondary: #444746;
+  --theme-pulse-color: rgba(138, 180, 248, 0.3);
+  
+  /* Sidebar specific */
+  --theme-sidebar-background: #2f2f2f;
+  --theme-sidebar-item-hover: #3c4043;
+  --theme-sidebar-item-active: #2d4356;
+  --theme-sidebar-border: #444746;
+  
+  /* Navigation specific */
+  --theme-nav-background: rgba(47, 47, 47, 0.95);
+  --theme-nav-border: #444746;
+  --theme-nav-item-hover: #3c4043;
+  --theme-nav-item-active: #2d4356;
+}
+
+/* ===================================
+ * LIGHT THEME (Future Implementation)
+ * Currently commented out - will be enabled when theme toggle is implemented
+ * =================================== */
+/*
+[data-theme="light"] {
+  /* Core color system */
+  --theme-background-primary: #ffffff;
+  --theme-background-secondary: #f8f9fa;
+  --theme-background-tertiary: #f1f3f4;
+  --theme-background-elevated: #ffffff;
+  --theme-background-overlay: rgba(255, 255, 255, 0.95);
+  
+  /* Interactive backgrounds */
+  --theme-background-hover: #f8f9fa;
+  --theme-background-active: #e8eaed;
+  --theme-background-selected: #e3f2fd;
+  
+  /* Text colors */
+  --theme-text-primary: #202124;
+  --theme-text-secondary: #5f6368;
+  --theme-text-tertiary: #80868b;
+  --theme-text-disabled: #bdc1c6;
+  --theme-text-inverse: #ffffff;
+  
+  /* Accent colors */
+  --theme-accent-primary: #1a73e8;
+  --theme-accent-secondary: #4285f4;
+  --theme-accent-hover: #1557b0;
+  --theme-accent-active: #1967d2;
+  
+  /* Status colors */
+  --theme-success: #137333;
+  --theme-success-hover: #0f5132;
+  --theme-warning: #f57c00;
+  --theme-warning-hover: #ef6c00;
+  --theme-error: #d93025;
+  --theme-error-hover: #c5221f;
+  --theme-info: #1976d2;
+  --theme-info-hover: #1565c0;
+  
+  /* Border colors */
+  --theme-border-default: #e0e0e0;
+  --theme-border-muted: #f0f0f0;
+  --theme-border-strong: #bdbdbd;
+  --theme-border-interactive: #1a73e8;
+  
+  /* Voice/Audio specific colors */
+  --theme-voice-recording: #d93025;
+  --theme-voice-processing: #f57c00;
+  --theme-voice-complete: #137333;
+  --theme-voice-waveform: #1a73e8;
+  
+  /* Chat/Message specific colors */
+  --theme-message-user-bg: #e3f2fd;
+  --theme-message-assistant-bg: #f8f9fa;
+  --theme-message-system-bg: #f1f3f4;
+  
+  /* Input specific colors */
+  --theme-input-background: #ffffff;
+  --theme-input-border: #e0e0e0;
+  --theme-input-border-focus: #1a73e8;
+  --theme-input-placeholder: #9aa0a6;
+  
+  /* Button specific colors */
+  --theme-button-primary-bg: #1a73e8;
+  --theme-button-primary-text: #ffffff;
+  --theme-button-primary-hover: #1557b0;
+  --theme-button-secondary-bg: transparent;
+  --theme-button-secondary-text: #202124;
+  --theme-button-secondary-border: #e0e0e0;
+  --theme-button-secondary-hover: #f8f9fa;
+  --theme-button-ghost-hover: rgba(26, 115, 232, 0.1);
+  
+  /* Shadow system */
+  --theme-shadow-sm: 0 1px 3px rgba(60, 64, 67, 0.15);
+  --theme-shadow-md: 0 4px 8px rgba(60, 64, 67, 0.15);
+  --theme-shadow-lg: 0 8px 16px rgba(60, 64, 67, 0.15);
+  --theme-shadow-xl: 0 12px 24px rgba(60, 64, 67, 0.15);
+  
+  /* Gradient system */
+  --theme-gradient-background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  --theme-gradient-overlay: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 249, 250, 0.9) 100%);
+  --theme-gradient-button: linear-gradient(135deg, #1a73e8 0%, #4285f4 100%);
+  
+  /* Animation and transition colors */
+  --theme-loading-primary: #1a73e8;
+  --theme-loading-secondary: #e0e0e0;
+  --theme-pulse-color: rgba(26, 115, 232, 0.3);
+  
+  /* Sidebar specific */
+  --theme-sidebar-background: #f8f9fa;
+  --theme-sidebar-item-hover: #f1f3f4;
+  --theme-sidebar-item-active: #e3f2fd;
+  --theme-sidebar-border: #e0e0e0;
+  
+  /* Navigation specific */
+  --theme-nav-background: rgba(248, 249, 250, 0.95);
+  --theme-nav-border: #e0e0e0;
+  --theme-nav-item-hover: #f1f3f4;
+  --theme-nav-item-active: #e3f2fd;
+}
+*/
+
+/* ===================================
+ * THEME TRANSITION UTILITIES
+ * =================================== */
+.theme-transition {
+  transition: 
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease,
+    fill 0.25s ease,
+    stroke 0.25s ease,
+    opacity 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
+}
+
+/* ===================================
+ * SEMANTIC COLOR MAPPINGS
+ * Maps theme-agnostic semantic names to current theme values
+ * =================================== */
+:root {
+  /* Background mappings */
+  --bg-primary: var(--theme-background-primary);
+  --bg-secondary: var(--theme-background-secondary);
+  --bg-tertiary: var(--theme-background-tertiary);
+  --bg-hover: var(--theme-background-hover);
+  --bg-selected: var(--theme-background-selected);
+  
+  /* Text mappings */
+  --text-primary: var(--theme-text-primary);
+  --text-secondary: var(--theme-text-secondary);
+  --text-muted: var(--theme-text-tertiary);
+  
+  /* Accent mappings */
+  --accent-primary: var(--theme-accent-primary);
+  --accent-hover: var(--theme-accent-hover);
+  
+  /* Border mappings */
+  --border-color: var(--theme-border-default);
+  --border-interactive: var(--theme-border-interactive);
+  
+  /* Shadow mappings */
+  --shadow-sm: var(--theme-shadow-sm);
+  --shadow-md: var(--theme-shadow-md);
+  --shadow-lg: var(--theme-shadow-lg);
+  
+  /* Gradient mappings */
+  --gradient-primary: var(--theme-gradient-background);
+  --gradient-overlay: var(--theme-gradient-overlay);
+}
+
+/* ===================================
+ * COMPONENT-SPECIFIC THEME UTILITIES
+ * =================================== */
+
+/* Voice Recording States */
+.voice-recording { color: var(--theme-voice-recording); }
+.voice-processing { color: var(--theme-voice-processing); }
+.voice-complete { color: var(--theme-voice-complete); }
+
+/* Message Bubbles */
+.message-user { background: var(--theme-message-user-bg); }
+.message-assistant { background: var(--theme-message-assistant-bg); }
+.message-system { background: var(--theme-message-system-bg); }
+
+/* Input States */
+.input-theme {
+  background: var(--theme-input-background);
+  border-color: var(--theme-input-border);
+  color: var(--theme-text-primary);
+}
+
+.input-theme:focus {
+  border-color: var(--theme-input-border-focus);
+}
+
+.input-theme::placeholder {
+  color: var(--theme-input-placeholder);
+}
+
+/* Button Variants */
+.btn-primary {
+  background: var(--theme-button-primary-bg);
+  color: var(--theme-button-primary-text);
+}
+
+.btn-primary:hover {
+  background: var(--theme-button-primary-hover);
+}
+
+.btn-secondary {
+  background: var(--theme-button-secondary-bg);
+  color: var(--theme-button-secondary-text);
+  border: 1px solid var(--theme-button-secondary-border);
+}
+
+.btn-secondary:hover {
+  background: var(--theme-button-secondary-hover);
+}
+
+.btn-ghost:hover {
+  background: var(--theme-button-ghost-hover);
+}
+
+/* Status Indicators */
+.status-success { color: var(--theme-success); }
+.status-warning { color: var(--theme-warning); }
+.status-error { color: var(--theme-error); }
+.status-info { color: var(--theme-info); }
+
+/* Loading and Animation States */
+.loading-pulse {
+  background: var(--theme-pulse-color);
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
+}
+
+/* Sidebar Theme Classes */
+.sidebar-theme {
+  background: var(--theme-sidebar-background);
+  border-color: var(--theme-sidebar-border);
+}
+
+.sidebar-item:hover {
+  background: var(--theme-sidebar-item-hover);
+}
+
+.sidebar-item.active {
+  background: var(--theme-sidebar-item-active);
+}
