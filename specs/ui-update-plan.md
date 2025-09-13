@@ -23,14 +23,14 @@ Transform VeMorable's interface to a modern ChatGPT-style dark theme UI with voi
   - `/src/styles/themes.css` (new)
 
 ### Tasks
-- [ ] Create CSS custom properties for dark theme colors in globals.css
-- [ ] [P] Create themes.css with dark theme variables and future light theme structure
-- [ ] [P] Update body and root styles for dark background gradient
-- [ ] Add Inter font import and set as primary font family
-- [ ] Create utility classes for common dark theme patterns
-- [ ] Update root layout.tsx to include theme provider structure
-- [ ] Add data-theme attribute handler for future theme switching
-- [ ] Remove any conflicting light theme defaults
+- [x] Create CSS custom properties for dark theme colors in globals.css
+- [x] [P] Create themes.css with dark theme variables and future light theme structure
+- [x] [P] Update body and root styles for dark background gradient
+- [x] Add Inter font import and set as primary font family
+- [x] Create utility classes for common dark theme patterns
+- [x] Update root layout.tsx to include theme provider structure
+- [x] Add data-theme attribute handler for future theme switching
+- [x] Remove any conflicting light theme defaults
 
 ---
 
@@ -44,17 +44,17 @@ Transform VeMorable's interface to a modern ChatGPT-style dark theme UI with voi
 - `/src/hooks/useSidebar.ts` (new)
 
 ### Tasks
-- [ ] Create Sidebar.tsx component with dark theme styling
-- [ ] [P] Implement "New Note" button with plus icon at top
-- [ ] [P] Create RecentNotes list component within sidebar
-- [ ] Add note item hover states and selection indicators
-- [ ] Implement sidebar collapse/expand functionality
-- [ ] [P] Add Search quick access button at bottom
-- [ ] [P] Add Settings link at bottom
-- [ ] [P] Add UserProfile section at bottom
-- [ ] Create mobile responsive behavior (slide-out drawer)
-- [ ] Add keyboard navigation support (up/down arrows)
-- [ ] [P] Write tests for Sidebar component
+- [x] Create Sidebar.tsx component with dark theme styling
+- [x] [P] Implement "New Note" button with plus icon at top
+- [x] [P] Create RecentNotes list component within sidebar
+- [x] Add note item hover states and selection indicators
+- [x] Implement sidebar collapse/expand functionality
+- [x] [P] Add Search quick access button at bottom
+- [x] [P] Add Settings link at bottom
+- [x] [P] Add UserProfile section at bottom
+- [x] Create mobile responsive behavior (slide-out drawer)
+- [x] Add keyboard navigation support (up/down arrows)
+- [x] [P] Write tests for Sidebar component
 
 ---
 
