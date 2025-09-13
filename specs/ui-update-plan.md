@@ -68,17 +68,17 @@ Transform VeMorable's interface to a modern ChatGPT-style dark theme UI with voi
 - `/src/types/input.types.ts` (new)
 
 ### Tasks
-- [ ] Create BottomInputBar.tsx with fixed bottom positioning
-- [ ] Implement large microphone button as default state
-- [ ] Add text input field (hidden by default)
-- [ ] Create input mode detection (voice vs text)
-- [ ] Implement button swap animation (mic → send)
-- [ ] [P] Add file attachment button (paperclip icon)
-- [ ] [P] Add input field auto-resize on content
-- [ ] Create voice recording visual feedback
-- [ ] Add character/time limit indicators
-- [ ] Implement mobile keyboard handling
-- [ ] [P] Write tests for BottomInputBar component
+- [x] Create BottomInputBar.tsx with fixed bottom positioning
+- [x] Implement large microphone button as default state
+- [x] Add text input field (hidden by default)
+- [x] Create input mode detection (voice vs text)
+- [x] Implement button swap animation (mic → send)
+- [x] [P] Add file attachment button (paperclip icon)
+- [x] [P] Add input field auto-resize on content
+- [x] Create voice recording visual feedback
+- [x] Add character/time limit indicators
+- [x] Implement mobile keyboard handling
+- [x] [P] Write tests for BottomInputBar component
 
 ---
 
