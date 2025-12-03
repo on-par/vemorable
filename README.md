@@ -1,177 +1,162 @@
-# VeMorable
+# Vemorable
 
-VeMorable is a voice-first AI-powered note-taking micro SaaS application that enables verbal processors to capture thoughts via voice, automatically organize them with AI, and interact with their knowledge base through natural conversation.
+A mobile brain dump app. Record voice memos, get one sharp insight back, and let everything auto-organize into a searchable archive you never manually maintain.
 
-## Features
+## Core Concept
 
-- 🎤 Voice recording and transcription using OpenAI Whisper
-- 🤖 AI-powered note processing and enhancement
-- 💬 Chat with your notes using natural language
-- 🔍 Semantic search across all your notes
-- 📁 Automatic organization with tags and summaries
-- 🔐 Secure authentication with Clerk
-- 📱 Responsive design for mobile and desktop
+**Input:** Voice recording triggered by a single tap. A rotating prompt greets the user to spark reflection.
+
+**Processing:** Transcription → AI analysis in one of four "insight modes" → auto-tagging.
+
+**Output:** One actionable insight ("The One Thing") + auto-generated tags + full transcript stored and embedded for semantic search.
+
+**Retrieval:** Search bar with semantic search across all dumps. Browse by auto-generated tags. No manual organization ever.
 
 ## Tech Stack
 
-- **Frontend**: Next.js 15, React 19, TypeScript, Tailwind CSS
-- **Authentication**: Clerk
-- **Database**: Supabase (PostgreSQL with pgvector)
-- **AI/ML**: OpenAI (Whisper, GPT-3.5-turbo, Embeddings)
-- **Deployment**: Vercel
+| Layer         | Technology                                    |
+| ------------- | --------------------------------------------- |
+| Framework     | Expo (React Native) with Expo Router          |
+| Audio         | expo-av                                       |
+| Transcription | Whisper API (OpenAI)                          |
+| AI Processing | Claude API (claude-sonnet-4-20250514)                       |
+| Database      | Supabase (Postgres + pgvector for embeddings) |
+| Embeddings    | OpenAI text-embedding-3-small                 |
+| Auth          | Supabase Auth (magic link)                    |
+| State         | Zustand                                       |
+| Styling       | NativeWind (Tailwind for React Native)        |
 
-## Prerequisites
+## Getting Started
 
-Before you begin, ensure you have:
+### Prerequisites
 
-- Node.js 18+ installed
-- npm or yarn package manager
-- Accounts for:
-  - [Clerk](https://clerk.com) (authentication)
-  - [Supabase](https://supabase.com) (database)
-  - [OpenAI](https://platform.openai.com) (AI services)
-  - [Vercel](https://vercel.com) (deployment, optional)
+- Node.js 18+
+- Expo CLI (`npm install -g expo-cli`)
+- Supabase account
+- OpenAI API key
+- Anthropic API key
 
-## Setup Instructions
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/yourusername/vemorable.git
-cd vemorable
-```
-
-### 2. Install Dependencies
+### Installation
 
 ```bash
+# Install dependencies
 npm install
+
+# Copy environment variables
+cp .env.example .env
+# Edit .env with your credentials
+
+# Start the development server
+npm start
 ```
 
-### 3. Environment Variables
+### Supabase Setup
 
-Create a `.env.local` file in the root directory with the following variables:
-
-```env
-# Clerk Authentication
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_your_publishable_key
-CLERK_SECRET_KEY=sk_test_your_secret_key
-
-# Supabase Database
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-DATABASE_URL=postgresql://postgres:password@db.your-project.supabase.co:5432/postgres
-
-# OpenAI API
-OPENAI_API_KEY=sk-your-openai-api-key
-
-# Application URL (for production)
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-```
-
-#### Getting Your API Keys:
-
-**Clerk:**
-1. Sign up at [clerk.com](https://clerk.com)
-2. Create a new application
-3. Copy the Publishable Key and Secret Key from the dashboard
-
-**Supabase:**
-1. Sign up at [supabase.com](https://supabase.com)
-2. Create a new project
-3. Go to Settings → API
-4. Copy the Project URL and anon/public key
-5. Go to Settings → Database
-6. Copy the connection string for DATABASE_URL
-
-**OpenAI:**
-1. Sign up at [platform.openai.com](https://platform.openai.com)
-2. Go to API Keys
-3. Create a new secret key
-
-### 4. Database Setup
-
-1. **Enable pgvector extension in Supabase:**
-   - Go to your Supabase dashboard
-   - Navigate to SQL Editor
-   - Run the following command:
-   ```sql
-   CREATE EXTENSION IF NOT EXISTS vector;
-   ```
-
-2. **Run database migrations:**
-   - Copy the schema from `supabase/migrations/001_initial_schema.sql`
-   - Execute it in the Supabase SQL Editor
-
-3. **Generate Prisma client (if using Prisma):**
-   ```bash
-   npm run db:generate
-   ```
-
-### 5. Run the Development Server
+1. Create a new Supabase project
+2. Run the migration in `supabase/migrations/20240101000000_init.sql`
+3. Deploy the Edge Functions:
 
 ```bash
-npm run dev
+supabase functions deploy process-dump
+supabase functions deploy search-dumps
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to see the application.
+4. Set the Edge Function secrets:
+
+```bash
+supabase secrets set OPENAI_API_KEY=your_key
+supabase secrets set ANTHROPIC_API_KEY=your_key
+```
 
 ## Project Structure
 
 ```
 vemorable/
-├── src/
-│   ├── app/              # Next.js app directory
-│   ├── components/       # React components
-│   ├── lib/             # Utility functions and configurations
-│   ├── types/           # TypeScript type definitions
-│   └── hooks/           # Custom React hooks
-├── public/              # Static assets
-├── supabase/           # Database migrations
-└── context/            # Project documentation and roadmap
+├── app/                    # Expo Router screens
+│   ├── _layout.tsx         # Root layout with providers
+│   ├── index.tsx           # Main recording screen
+│   ├── result.tsx          # Post-recording insight display
+│   ├── archive.tsx         # Browse past dumps by tag
+│   ├── search.tsx          # Semantic search interface
+│   └── dump/[id].tsx       # Dump detail view
+├── components/             # React Native components
+│   ├── RecordButton.tsx
+│   ├── Waveform.tsx
+│   ├── PromptDisplay.tsx
+│   ├── InsightCard.tsx
+│   ├── TagCloud.tsx
+│   ├── DumpListItem.tsx
+│   ├── InsightModeSelector.tsx
+│   └── ProcessingOverlay.tsx
+├── lib/                    # Utility libraries
+│   ├── audio.ts            # Recording utilities
+│   ├── transcription.ts    # Transcription helpers
+│   ├── ai.ts               # AI insight utilities
+│   ├── embeddings.ts       # Embedding utilities
+│   ├── supabase.ts         # Supabase client + queries
+│   └── prompts.ts          # Rotating prompt bank
+├── stores/                 # Zustand state management
+│   └── dumpStore.ts
+├── types/                  # TypeScript types
+│   └── index.ts
+├── constants/              # App constants
+│   └── insightModes.ts
+└── supabase/
+    ├── functions/          # Edge Functions
+    │   ├── process-dump/
+    │   └── search-dumps/
+    └── migrations/         # Database migrations
 ```
 
-## Available Scripts
+## Insight Modes
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
-- `npm run db:generate` - Generate Prisma client
+| Mode    | Description                   |
+| ------- | ----------------------------- |
+| Action  | Surface a concrete next step  |
+| Tension | Name the unresolved conflict  |
+| Clarity | Distill the core thought      |
+| Pattern | Connect to recurring themes   |
 
-## Database Schema
+## Features
 
-The application uses three main tables:
+- [x] Tap to record, tap to stop
+- [x] Rotating prompt display on main screen
+- [x] Audio transcription via Whisper
+- [x] "The One Thing" insight generation (4 modes)
+- [x] Auto-tagging (3-5 tags per dump)
+- [x] Result screen showing insight + tags
+- [x] Semantic search across all dumps
+- [x] Tag-based archive browsing
+- [x] Dark minimal UI
 
-- **notes**: Stores user notes with AI-generated metadata
-- **chat_sessions**: Stores chat conversation sessions
-- **chat_messages**: Stores individual chat messages
+## Development
 
-See `supabase/migrations/001_initial_schema.sql` for the complete schema.
+```bash
+# Run on iOS simulator
+npm run ios
 
-## Development Workflow
+# Run on Android emulator
+npm run android
 
-1. Check `context/roadmap.md` for the project roadmap and user stories
-2. Follow the TDD approach for new features
-3. Ensure all tests pass before committing
-4. Use conventional commit messages (feat:, fix:, docs:, etc.)
+# Run type checking
+npm run typecheck
 
-## Deployment
+# Run linting
+npm run lint
 
-### Vercel Deployment
+# Run tests
+npm run test
+```
 
-1. Push your code to GitHub
-2. Connect your GitHub repository to Vercel
-3. Configure environment variables in Vercel dashboard
-4. Deploy
+## Environment Variables
 
-## Contributing
-
-Please read the development guidelines in `CLAUDE.md` for coding standards and best practices.
+```bash
+EXPO_PUBLIC_SUPABASE_URL=your_supabase_url
+EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+OPENAI_API_KEY=your_openai_key          # For Edge Functions
+ANTHROPIC_API_KEY=your_anthropic_key    # For Edge Functions
+```
 
 ## License
 
-This project is private and proprietary.
-
-## Support
-
-For issues and questions, please open an issue in the GitHub repository.
+MIT
